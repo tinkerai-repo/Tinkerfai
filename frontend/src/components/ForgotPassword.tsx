@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./ForgotPassword.css";
-import logo from "./assets/tinkerfai-logo.png";
+import logo from "../assets/tinkerfai-logo.png";
 
 interface ForgotPasswordProps {
   onBackToLogin: () => void;

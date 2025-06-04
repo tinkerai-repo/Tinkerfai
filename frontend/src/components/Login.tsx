@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./Login.css";
-import logo from "./assets/tinkerfai-logo.png";
-import puzzleBg from "./assets/close-up-puzzle-background.jpg";
+import logo from "../assets/tinkerfai-logo.png";
+import puzzleBg from "../assets/close-up-puzzle-background.jpg";
 import ForgotPassword from "./ForgotPassword";
 import SignUp from "./SignUp";
-import googleIcon from "./assets/google_icon.png";
+import googleIcon from "../assets/google_icon.png";
 
 const Login = () => {
   // Form states

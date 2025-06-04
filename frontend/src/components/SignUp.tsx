@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import "./SignUp.css";
-import { FaGoogle, FaGithub } from "react-icons/fa";
-import logo from "./assets/tinkerfai-logo.png";
-import googleIcon from "./assets/google_icon.png";
+import logo from "../assets/tinkerfai-logo.png";
+import googleIcon from "../assets/google_icon.png";
 
 interface SignUpProps {
   onSignInClick: () => void;
