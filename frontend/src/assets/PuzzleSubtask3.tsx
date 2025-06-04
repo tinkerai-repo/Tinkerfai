@@ -1,0 +1,28 @@
+import * as React from "react";
+
+interface Props extends React.SVGProps<SVGSVGElement> {
+  fill?: string;
+  height?: number | string;
+}
+
+const PuzzleSubtask3: React.FC<Props> = ({
+  fill = "#1E1E1E",
+  height = 250,
+  ...props
+}) => (
+  <svg
+    width={height}
+    height={height}
+    viewBox="0 0 250 250"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M10 250C4.47716 250 0 245.523 0 240L0 10C0 4.47716 4.47716 0 10 0H98.5459C90.2403 7.3295 85 18.052 85 30C85 52.0914 102.909 70 125 70C147.091 70 165 52.0914 165 30C165 18.052 159.76 7.3295 151.454 0H240C245.523 0 250 4.47716 250 10V98.5459C242.671 90.2403 231.948 85 220 85C197.909 85 180 102.909 180 125C180 147.091 197.909 165 220 165C231.948 165 242.671 159.76 250 151.455V240C250 245.523 245.523 250 240 250L10 250Z"
+      fill={fill}
+    />
+  </svg>
+);
+
+export default PuzzleSubtask3;
