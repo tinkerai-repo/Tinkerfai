@@ -1,0 +1,81 @@
+.header-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  height: 8vh;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.header-logo-container {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  transform: translateX(-50%);
+}
+
+.header-logo {
+  height: 5vh;
+  display: block;
+}
+
+.header-profile-icon {
+  width: 6vh;
+  height: 6vh;
+  padding: 0.7vh;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: none;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.header-profile-icon:active,
+.header-profile-icon:focus {
+  box-shadow: 0 0 0 2px #8882;
+  outline: none;
+}
+
+.header-coin-counter {
+  display: flex;
+  align-items: center;
+  background: #aaa;
+  border-radius: 999px;
+  padding: 0.1vh 1.2vh 0.1vh 1.2vh;
+  margin-right: 1.2vw;
+  height: 6vh;
+  min-width: 8vh;
+  box-sizing: border-box;
+}
+
+.header-coin-icon {
+  width: 3vh;
+  height: 3vh;
+  margin-right: 1.2vh;
+  background: none;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.header-coin-number {
+  font-size: 2.5vh;
+  font-family: 'Roboto Mono', monospace;
+  color: #fff;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  line-height: 1;
+} 
