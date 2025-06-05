@@ -1,0 +1,259 @@
+html, body {
+  background: #D3D1CE !important;
+  min-height: 100vh;
+}
+
+/* Root container: full height minus header */
+.dashboard-root {
+  width: 100vw;
+  min-height: 92vh;
+  background: #D3D1CE;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #404040;
+}
+
+/* Profile Section */
+.profile-section {
+  width: 70vw;
+  min-height: 42vh;
+  margin-left: 15vw;
+  margin-right: 15vw;
+  display: flex;
+  align-items: flex-start;
+  border-bottom: 2px solid #888;
+  position: relative;
+}
+
+.profile-content {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  padding-top: 10vh;
+  box-sizing: border-box;
+}
+
+.profile-icon {
+  height: 22vh;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  background: #fff;
+  margin-right: 3vw;
+  margin-top: 0;
+}
+
+.profile-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+}
+
+.profile-info {
+  height: 16vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  font-size: 2.2vh;
+  margin-bottom: 0;
+}
+
+.profile-level-label {
+  margin-top: 1vh;
+}
+
+.profile-level-bar-container {
+  height: 6vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 0;
+}
+
+.profile-level-bar {
+  position: relative;
+  width: 90%;
+  height: 1.5vh;
+  background: #f0f0f0;
+  border-radius: 1vh;
+  margin-bottom: 0.5vh;
+}
+
+.profile-level-bar-progress {
+  position: absolute;
+  height: 100%;
+  background: #888;
+  border-radius: 1vh 0 0 1vh;
+}
+
+.profile-level-knob {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.5vh;
+  height: 2.5vh;
+  background: #bdbdbd;
+  border-radius: 50%;
+  border: 2px solid #888;
+}
+
+.profile-level-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.7vh;
+  width: 90%;
+  margin-top: 0.5vh;
+}
+
+.badges-section {
+  display: flex;
+  align-items: center;
+  height: 10vh;
+  margin-top: 0;
+}
+
+.badges-label {
+  font-size: 2vh;
+  margin-right: 1vw;
+}
+
+.badges-list {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+}
+
+.badge-icon {
+  height: 7vh;
+  width: 7vh;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #bdbdbd;
+}
+
+/* Projects Section */
+.projects-section {
+  width: 70vw;
+  min-height: 50vh;
+  margin-left: 15vw;
+  margin-right: 15vw;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.projects-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.projects-title {
+  font-size: 2.5vh;
+  font-weight: 500;
+  margin-bottom: 2vh;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 13vw);
+  grid-template-rows: repeat(2, 25vh);
+  gap: 10vh 6vw;
+  justify-content: space-between;
+  width: 100%;
+  height: 60vh;
+}
+
+.project-card {
+  width: 13vw;
+  height: 25vh;
+  background: #A9A8A7;
+  border-radius: 1.5vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.project-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+
+.project-plus-icon {
+  width: 15vh;
+  height: 15vh;
+  margin-bottom: 1vh;
+}
+
+.project-label {
+  font-size: 2vh;
+  text-align: center;
+  margin-top: 0.5vh;
+}
+
+/* Ensure all text elements inherit or use #404040 */
+.profile-name,
+.profile-email,
+.profile-level-label,
+.profile-level-labels span,
+.badges-label,
+.projects-title,
+.project-label {
+  color: #404040;
+}
+
+.edit-profile-icon {
+  position: absolute;
+  top: 10vh;
+  right: 2vw;
+  width: 2.5vw;
+  height: 2.5vw;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 40px;
+  max-height: 40px;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+  z-index: 2;
+}
+
+.edit-profile-icon:hover {
+  opacity: 1;
+}
+
+.badge-tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.badge-tooltip {
+  visibility: hidden;
+  background: #404040;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 0.5vh 1vw;
+  position: absolute;
+  z-index: 10;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+  font-size: 1.7vh;
+  white-space: nowrap;
+}
+
+.badge-tooltip-container:hover .badge-tooltip {
+  visibility: visible;
+  opacity: 1;
+} 
