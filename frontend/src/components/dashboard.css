@@ -58,11 +58,12 @@ html, body {
   flex-direction: column;
   justify-content: flex-start;
   font-size: 2.2vh;
-  margin-bottom: 0;
+  margin-bottom: 0vh;
 }
 
 .profile-level-label {
   margin-top: 1vh;
+  margin-bottom: 0;
 }
 
 .profile-level-bar-container {
@@ -70,7 +71,7 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-bottom: 0;
+  margin: 0 0 1vh 0;
 }
 
 .profile-level-bar {
@@ -105,7 +106,7 @@ html, body {
   justify-content: space-between;
   font-size: 1.7vh;
   width: 90%;
-  margin-top: 0.5vh;
+  margin-top: 0;
 }
 
 .badges-section {
@@ -256,4 +257,193 @@ html, body {
 .badge-tooltip-container:hover .badge-tooltip {
   visibility: visible;
   opacity: 1;
+}
+
+.profile-name {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+  font-size: 2.2vh;
+}
+
+.profile-name-input {
+  font-size: 2.2vh;
+  padding: 0.5vh 1vw;
+  border: 1px solid #A9A8A7;
+  border-radius: 0.5vh;
+  color: #404040;
+  background: #fff;
+  margin-bottom: 0;
+}
+
+.profile-slider-input {
+  width: 90%;
+  margin: 1vh 0 0.5vh 0;
+  accent-color: #888;
+  height: 1.5vh;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  position: relative;
+  top: 0;
+}
+
+/* Chrome, Safari */
+.profile-slider-input::-webkit-slider-runnable-track {
+  height: 1.5vh;
+  background: linear-gradient(
+    to right,
+    #404040 0%,
+    #404040 calc(var(--percent, 50%) * 1%),
+    #fff calc(var(--percent, 50%) * 1%),
+    #fff 100%
+  );
+  border-radius: 0.75vh;
+}
+
+/* Firefox */
+.profile-slider-input::-moz-range-track {
+  height: 1.5vh;
+  background: #fff;
+  border-radius: 0.75vh;
+}
+.profile-slider-input::-moz-range-progress {
+  height: 1.5vh;
+  background: #404040;
+  border-radius: 0.75vh;
+}
+
+/* IE */
+.profile-slider-input::-ms-fill-lower {
+  background: #404040;
+  border-radius: 0.75vh;
+}
+.profile-slider-input::-ms-fill-upper {
+  background: #fff;
+  border-radius: 0.75vh;
+}
+
+.profile-slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 3vh;
+  height: 3vh;
+  margin-top: -0.75vh;
+  border-radius: 50%;
+  background: #404040;
+  border: 2px solid #A9A8A7;
+  cursor: pointer;
+  box-shadow: 0 0 2px #888;
+  transition: background 0.2s;
+}
+
+.profile-slider-input:disabled::-webkit-slider-thumb {
+  background: #404040;
+  border: 2px solid #A9A8A7;
+  cursor: default;
+  opacity: 1;
+}
+
+.profile-slider-input::-moz-range-thumb {
+  width: 3vh;
+  height: 3vh;
+  border-radius: 50%;
+  background: #404040;
+  border: 2px solid #A9A8A7;
+  cursor: pointer;
+  box-shadow: 0 0 2px #888;
+  transition: background 0.2s;
+  margin-top: -0.75vh;
+}
+
+.profile-slider-input:disabled::-moz-range-thumb {
+  background: #404040;
+  border: 2px solid #A9A8A7;
+  cursor: default;
+  opacity: 1;
+}
+
+.profile-slider-input::-ms-thumb {
+  width: 3vh;
+  height: 3vh;
+  border-radius: 50%;
+  background: #404040;
+  border: 2px solid #A9A8A7;
+  cursor: pointer;
+  box-shadow: 0 0 2px #888;
+  transition: background 0.2s;
+  margin-top: -0.75vh;
+}
+
+.profile-slider-input:disabled::-ms-thumb {
+  background: #404040;
+  border: 2px solid #A9A8A7;
+  cursor: default;
+  opacity: 1;
+}
+
+.profile-slider-input:disabled::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    #404040 0%,
+    #404040 calc(var(--percent, 50%) * 1%),
+    #fff calc(var(--percent, 50%) * 1%),
+    #fff 100%
+  ) !important;
+  opacity: 1;
+}
+
+.profile-slider-input:disabled::-moz-range-track {
+  background: #fff !important;
+  opacity: 1;
+}
+
+.profile-slider-input:disabled::-ms-fill-lower {
+  background: #404040 !important;
+  opacity: 1;
+}
+
+.profile-slider-input:disabled::-ms-fill-upper {
+  background: #fff !important;
+  opacity: 1;
+}
+
+.profile-edit-buttons {
+  display: flex;
+  gap: 2vw;
+  margin: 1vh 0 1vh 0;
+}
+
+.profile-modify-btn, .profile-cancel-btn {
+  font-size: 2vh;
+  padding: 0.7vh 2vw;
+  border: none;
+  border-radius: 0.7vh;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.profile-modify-btn {
+  background: #4CAF50;
+  color: #fff;
+}
+
+.profile-modify-btn:hover {
+  background: #388E3C;
+}
+
+.profile-cancel-btn {
+  background: #E57373;
+  color: #fff;
+}
+
+.profile-cancel-btn:hover {
+  background: #C62828;
+}
+
+.profile-level-current {
+  font-size: 1.8vh;
+  margin-top: 0.5vh;
+  color: #404040;
+  font-weight: 500;
 } 

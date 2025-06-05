@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import "./dashboard.css";
 import Header from "./Header";
 import profileImg from "../assets/profile.png";
 import createProjectPlus from "../assets/create-project-plus.png";
 import editProfileIcon from "../assets/edit-profile-icon.png";
+import CreateProjectModal from "./CreateProjectModal";
 
 const badges = [
   "green-thumb.png",
@@ -27,23 +28,70 @@ const badgeThemes: { [key: string]: string } = {
   "business.png": "small business, big dreams",
 };
 
+const devLevels = ["Curious Beginner", "Code Adventurer", "Master Tinkerer"];
+
 const Dashboard: React.FC = () => {
+  // State for edit mode
+  const [editMode, setEditMode] = useState(false);
+  const [name, setName] = useState("exampleName123");
+  const [level, setLevel] = useState(1); // 0, 1, 2
+  const [tempName, setTempName] = useState(name);
+  const [tempLevel, setTempLevel] = useState(level);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleEdit = () => {
+    setTempName(name);
+    setTempLevel(level);
+    setEditMode(true);
+  };
+
+  const handleCancel = () => {
+    setTempName(name);
+    setTempLevel(level);
+    setEditMode(false);
+  };
+
+  const handleModify = () => {
+    setName(tempName);
+    setLevel(tempLevel);
+    setEditMode(false);
+  };
+
   return (
     <>
       <Header />
+      <CreateProjectModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+      />
       <div className="dashboard-root">
         {/* Profile Section */}
         <div className="profile-section">
-          <img
-            src={editProfileIcon}
-            alt="Edit Profile"
-            className="edit-profile-icon"
-          />
+          {!editMode && (
+            <img
+              src={editProfileIcon}
+              alt="Edit Profile"
+              className="edit-profile-icon"
+              onClick={handleEdit}
+            />
+          )}
           <div className="profile-content">
             <img src={profileImg} alt="Profile" className="profile-icon" />
             <div className="profile-details">
               <div className="profile-info">
-                <div className="profile-name">Name: exampleName123</div>
+                <div className="profile-name">
+                  Name:{" "}
+                  {editMode ? (
+                    <input
+                      type="text"
+                      value={tempName}
+                      onChange={(e) => setTempName(e.target.value)}
+                      className="profile-name-input"
+                    />
+                  ) : (
+                    name
+                  )}
+                </div>
                 <div className="profile-email">
                   Profile Email: exampleName@gmail.com
                 </div>
@@ -53,11 +101,9 @@ const Dashboard: React.FC = () => {
                 <div className="profile-level-bar">
                   <div
                     className="profile-level-bar-progress"
-                    style={{ width: "40%" }}
-                  ></div>
-                  <div
-                    className="profile-level-knob"
-                    style={{ left: "40%" }}
+                    style={{
+                      width: `${((editMode ? tempLevel : level) / 2) * 100}%`,
+                    }}
                   ></div>
                 </div>
                 <div className="profile-level-labels">
@@ -65,7 +111,36 @@ const Dashboard: React.FC = () => {
                   <span>Code Adventurer</span>
                   <span>Master Tinkerer</span>
                 </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={2}
+                  step={1}
+                  value={editMode ? tempLevel : level}
+                  onChange={(e) =>
+                    editMode ? setTempLevel(Number(e.target.value)) : undefined
+                  }
+                  className="profile-slider-input"
+                  disabled={!editMode}
+                  style={
+                    {
+                      "--percent": `${
+                        ((editMode ? tempLevel : level) / 2) * 100
+                      }`,
+                    } as React.CSSProperties
+                  }
+                />
               </div>
+              {editMode && (
+                <div className="profile-edit-buttons">
+                  <button className="profile-modify-btn" onClick={handleModify}>
+                    Modify
+                  </button>
+                  <button className="profile-cancel-btn" onClick={handleCancel}>
+                    Cancel
+                  </button>
+                </div>
+              )}
               <div className="badges-section">
                 <span className="badges-label">Badges:</span>
                 <div className="badges-list">
@@ -96,7 +171,11 @@ const Dashboard: React.FC = () => {
             <div className="projects-title">Projects:</div>
             <div className="projects-grid">
               {[...Array(8)].map((_, idx) => (
-                <div className="project-card" key={idx}>
+                <div
+                  className="project-card"
+                  key={idx}
+                  onClick={() => setModalOpen(true)}
+                >
                   <img
                     src={createProjectPlus}
                     alt="Create Project"
