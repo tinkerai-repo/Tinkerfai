@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./dashboard.css";
+import "./Dashboard.css";
 import Header from "./Header";
 import profileImg from "../assets/profile.png";
 import createProjectPlus from "../assets/create-project-plus.png";

@@ -1,0 +1,104 @@
+.progress-section {
+  background: #888;
+  position: fixed;
+  top: 8vh;
+  left: 0;
+  width: 100vw;
+  z-index: 10;
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.25);
+  border-bottom-left-radius: 32px;
+  border-bottom-right-radius: 32px;
+}
+
+.drag-handle {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 50%);
+  background: #bbb;
+  border-radius: 50%;
+  width: 4vh;
+  height: 4vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  z-index: 100;
+  pointer-events: auto;
+}
+
+/* For bottom handle, allow override if needed */
+.drag-handle.bottom {
+  top: auto;
+  bottom: 0;
+  transform: translate(-50%, 50%);
+}
+
+.collapse-btn {
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 3vh;
+  height: 3vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: box-shadow 0.2s;
+}
+
+.collapse-btn:active,
+.collapse-btn:focus {
+  box-shadow: 0 0 0 2px #8882;
+  outline: none;
+}
+
+.puzzle-lock-hover:hover {
+  filter: drop-shadow(0 0 8px #222);
+  transition: filter 0.2s;
+}
+
+@keyframes blink-shadow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px #222a);
+  }
+  50% {
+    filter: drop-shadow(0 0 20px #222c);
+  }
+}
+
+.puzzle-piece-hoverable {
+  cursor: pointer;
+  filter: drop-shadow(0 0 10px #222a);
+  transition: filter 0.2s;
+  z-index: 1;
+}
+
+.puzzle-piece-hoverable:hover {
+  filter: drop-shadow(0 0 32px #111b);
+  z-index: 2;
+}
+
+.vertical-dashed-separator {
+  border-left: 2px dashed rgba(255,255,255,0.5);
+  height: 100%;
+  position: absolute;
+  top: 0;
+  z-index: 2;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

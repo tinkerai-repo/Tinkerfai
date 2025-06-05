@@ -1,0 +1,16 @@
+.chatbot-section {
+    background: #888;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100vw;
+    z-index: 10;
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    box-shadow: 0 -12px 32px 0 rgba(0, 0, 0, 0.25);
+    border-top-left-radius: 32px;
+    border-top-right-radius: 32px;
+}

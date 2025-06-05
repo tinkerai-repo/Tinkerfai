@@ -1,0 +1,54 @@
+.playground-section {
+  background: #e0e0e0;
+  width: 100%;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+  overflow-x: hidden;
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vertical-separator {
+  position: absolute;
+  top: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 200%;
+  background: repeating-linear-gradient(
+    to bottom,
+    #aaa,
+    #aaa 8px,
+    transparent 8px,
+    transparent 16px
+  );
+  z-index: 1;
+  border-radius: 2px;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.puzzle-blocks-container {
+  transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+.puzzle-blocks-container.shift-right {
+  /* transform handled inline, but class for clarity */
+}
+
+.puzzle-blocks-container.shift-left {
+  /* transform handled inline, but class for clarity */
+}
+
+.puzzle-area-wrapper {
+  position: relative;
+  width: 38.7vh;
+  height: 38.7vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
