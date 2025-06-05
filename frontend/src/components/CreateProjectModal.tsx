@@ -1,5 +1,6 @@
 import React from "react";
 import "./CreateProjectModal.css";
+import { useNavigate } from "react-router-dom";
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -10,12 +11,18 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   open,
   onClose,
 }) => {
+  const navigate = useNavigate();
   if (!open) return null;
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
+  };
+
+  const handleTrackClick = () => {
+    onClose();
+    navigate("/project");
   };
 
   return (
@@ -28,8 +35,12 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           What project track do you want to work on:
         </div>
         <div className="modal-btn-group">
-          <button className="modal-btn beginner">Beginner</button>
-          <button className="modal-btn expert">Expert</button>
+          <button className="modal-btn beginner" onClick={handleTrackClick}>
+            Beginner
+          </button>
+          <button className="modal-btn expert" onClick={handleTrackClick}>
+            Expert
+          </button>
         </div>
       </div>
     </div>
