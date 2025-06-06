@@ -32,8 +32,15 @@ const devLevels = ["Curious Beginner", "Code Adventurer", "Master Tinkerer"];
 
 const Dashboard: React.FC = () => {
   // State for edit mode
+  const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+  const fullName =
+    userInfo.firstName && userInfo.lastName
+      ? `${userInfo.firstName} ${userInfo.lastName}`
+      : "Unknown User";
+  const email = userInfo.email || "Unknown Email";
+
   const [editMode, setEditMode] = useState(false);
-  const [name, setName] = useState("exampleName123");
+  const [name, setName] = useState(fullName);
   const [level, setLevel] = useState(1); // 0, 1, 2
   const [tempName, setTempName] = useState(name);
   const [tempLevel, setTempLevel] = useState(level);
@@ -92,9 +99,7 @@ const Dashboard: React.FC = () => {
                     name
                   )}
                 </div>
-                <div className="profile-email">
-                  Profile Email: exampleName@gmail.com
-                </div>
+                <div className="profile-email">Profile Email: {email}</div>
                 <div className="profile-level-label">Developer Level:</div>
               </div>
               <div className="profile-level-bar-container">
