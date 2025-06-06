@@ -98,11 +98,11 @@ const Header: React.FC = () => {
                 color: "#222",
               }}
             >
-              <div style={{ padding: "8px 20px", cursor: "pointer" }}>
+              <div
+                style={{ padding: "8px 20px", cursor: "pointer" }}
+                onClick={() => navigate("/profile")}
+              >
                 My Profile
-              </div>
-              <div style={{ padding: "8px 20px", cursor: "pointer" }}>
-                My Badges
               </div>
               <div style={{ padding: "8px 20px", cursor: "pointer" }}>
                 Explore Community
