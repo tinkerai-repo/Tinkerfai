@@ -2,10 +2,12 @@ import React, { useState, useRef, useEffect } from "react";
 import "./Header.css";
 import logo from "../assets/tinkerfai-logo.png";
 import coinIcon from "../assets/coin-icon.png";
+import { useNavigate } from "react-router-dom";
 
 const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   // Close menu if clicked outside
   useEffect(() => {
@@ -23,6 +25,23 @@ const Header: React.FC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [menuOpen]);
+
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      // Optionally, send refreshToken or accessToken to backend for logout
+      const refreshToken = localStorage.getItem("refreshToken");
+      await fetch("http://localhost:8000/api/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+    } catch (e) {
+      // Ignore errors for now
+    }
+    localStorage.clear();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <header className="header-bar">
@@ -87,6 +106,12 @@ const Header: React.FC = () => {
               </div>
               <div style={{ padding: "8px 20px", cursor: "pointer" }}>
                 Explore Community
+              </div>
+              <div
+                style={{ padding: "8px 20px", cursor: "pointer" }}
+                onClick={handleLogout}
+              >
+                Logout
               </div>
             </div>
           )}

@@ -5,6 +5,7 @@ import puzzleBg from "../assets/close-up-puzzle-background.jpg";
 import ForgotPassword from "./ForgotPassword";
 import SignUp from "./SignUp";
 import googleIcon from "../assets/google_icon.png";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   // Form states
@@ -24,6 +25,8 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Create a new image object
@@ -94,11 +97,10 @@ const Login = () => {
         // Show success state
         setIsSuccess(true);
 
-        // TODO: Redirect to dashboard/home page
+        // Redirect to /profile after 2 seconds
         setTimeout(() => {
-          console.log("Redirect to dashboard");
-          // window.location.href = '/dashboard'; // Uncomment when you have dashboard
-        }, 1500);
+          navigate("/profile", { replace: true });
+        }, 2000);
       } else {
         // Display error from backend
         setErrorMessage(data.detail || data.message || "Sign in failed");
