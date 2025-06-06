@@ -150,7 +150,11 @@ const Dashboard: React.FC = () => {
                 <span className="badges-label">Badges:</span>
                 <div className="badges-list">
                   {badges.map((badge, idx) => (
-                    <div className="badge-tooltip-container" key={badge}>
+                    <div
+                      className="badge-tooltip-container"
+                      key={badge}
+                      style={{ position: "relative" }}
+                    >
                       <img
                         src={
                           new URL(`../assets/badges/${badge}`, import.meta.url)
@@ -159,6 +163,7 @@ const Dashboard: React.FC = () => {
                         alt={`badge-${idx}`}
                         className="badge-icon"
                       />
+                      <span className="badge-count-circle">x1</span>
                       <span className="badge-tooltip">
                         {badgeThemes[badge]}
                       </span>
