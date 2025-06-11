@@ -33,14 +33,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* Updated: Dynamic project route with projectId parameter */}
         <Route
-          path="/project"
+          path="/project/:projectId"
           element={
             <ProtectedRoute>
               <Project />
             </ProtectedRoute>
           }
         />
+        {/* Optional: Redirect /project to profile if no projectId */}
+        <Route path="/project" element={<Navigate to="/profile" replace />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
