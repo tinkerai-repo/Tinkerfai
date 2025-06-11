@@ -42,6 +42,11 @@
   opacity: 1;
 }
 
+.modal-close-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .modal-title {
   font-size: 2.2vh;
   color: #404040;
@@ -72,17 +77,28 @@
   border-radius: 0.7vh;
   outline: none;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .modal-input:focus {
   border-color: #4CAF50;
 }
 
+.modal-input:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .modal-error {
   color: #C62828;
   font-size: 1.4vh;
-  text-align: left;
+  text-align: center;
   margin-top: 0.5vh;
+  padding: 1vh;
+  background: rgba(198, 40, 40, 0.1);
+  border-radius: 0.5vh;
+  border: 1px solid rgba(198, 40, 40, 0.2);
 }
 
 .modal-btn-group {
@@ -98,7 +114,8 @@
   border-radius: 0.7vh;
   cursor: pointer;
   font-weight: 500;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s, opacity 0.2s;
+  min-width: 8vw;
 }
 
 .modal-btn.beginner {
@@ -106,7 +123,7 @@
   color: #fff;
 }
 
-.modal-btn.beginner:hover {
+.modal-btn.beginner:hover:not(:disabled) {
   background: #388E3C;
 }
 
@@ -115,6 +132,71 @@
   color: #fff;
 }
 
-.modal-btn.expert:hover {
+.modal-btn.expert:hover:not(:disabled) {
   background: #C62828;
-} 
+}
+
+.modal-btn:disabled,
+.modal-btn.creating {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Loading indicator */
+.modal-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5vh;
+  margin-top: 2vh;
+  color: #404040;
+  font-size: 1.8vh;
+}
+
+.modal-spinner {
+  width: 2.5vh;
+  height: 2.5vh;
+  border: 0.3vh solid #f3f3f3;
+  border-top: 0.3vh solid #4CAF50;
+  border-radius: 50%;
+  animation: modal-spin 1s linear infinite;
+}
+
+@keyframes modal-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modal-content {
+    padding: 2vh 3vw;
+    min-width: 280px;
+  }
+  
+  .modal-btn-group {
+    gap: 4vw;
+  }
+  
+  .modal-btn {
+    min-width: 12vw;
+    padding: 1.2vh 4vw;
+  }
+  
+  .modal-title {
+    font-size: 2vh;
+  }
+  
+  .modal-subtitle {
+    font-size: 1.6vh;
+  }
+  
+  .modal-input {
+    font-size: 1.6vh;
+  }
+  
+  .modal-loading {
+    font-size: 1.6vh;
+  }
+}

@@ -1,6 +1,8 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
+from datetime import datetime
 
+# Existing authentication models
 class SignupRequest(BaseModel):
     email: EmailStr
     password: str
@@ -31,6 +33,30 @@ class ResetPasswordRequest(BaseModel):
     newPassword: str
     confirmPassword: str
 
+# New project models
+class CreateProjectRequest(BaseModel):
+    projectName: str
+    projectType: str  # 'beginner' or 'expert'
+
+class ProjectResponse(BaseModel):
+    projectId: str
+    projectName: str
+    projectType: str
+    createdAt: str
+    updatedAt: str
+    userEmail: str
+
+class GetProjectsResponse(BaseModel):
+    success: bool
+    message: str
+    projects: List[ProjectResponse]
+
+class CreateProjectResponse(BaseModel):
+    success: bool
+    message: str
+    project: ProjectResponse
+
+# Generic response models
 class SuccessResponse(BaseModel):
     success: bool
     message: str

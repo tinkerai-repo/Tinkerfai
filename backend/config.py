@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     cognito_user_pool_id: str
     cognito_app_client_id: str
     
+    # DynamoDB Configuration
+    dynamodb_table_name: str = "tinkerfai-user-projects"
+    
     class Config:
         env_file = ".env"
 
