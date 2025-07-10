@@ -3,9 +3,8 @@ runtime: docker
 build:
   commands:
     build:
-      - echo "Building with Docker"
+      - docker build -t backend .
 run:
-  runtime-version: 1.0
   command: python main.py
   network:
     port: 8000
