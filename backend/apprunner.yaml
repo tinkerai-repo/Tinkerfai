@@ -1,0 +1,12 @@
+version: 1.0
+runtime: docker
+build:
+  commands:
+    build:
+      - echo "No build commands required for Docker"
+run:
+  runtime-version: latest
+  command: python main.py
+  network:
+    port: 8000
+    env: PORT
