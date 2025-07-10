@@ -1,7 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import "./PlaygroundSection.css";
 import PuzzlePiece from "./PuzzlePiece";
 import SubmitButton from "./SubmitButton";
+import QuestionRenderer from "./QuestionRenderer";
+import {
+  projectApi,
+  Question,
+  Answer,
+  getCurrentUser,
+} from "../services/projectApi";
 
 export type PuzzlePieceType =
   | "subtask-1"
@@ -41,50 +49,208 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
   selectedTaskIndex,
   currentSubtaskIndex,
   onSubtaskClick,
+  completedSubtasks,
   children,
 }) => {
+  const { projectId } = useParams<{ projectId: string }>();
+
+  // Question system state
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
+  const [existingAnswer, setExistingAnswer] = useState<Answer | undefined>();
+  const [datasetSummary, setDatasetSummary] = useState<any>(null);
+  const [currentAnswerData, setCurrentAnswerData] = useState<any>(null);
+  const [isAnswerValid, setIsAnswerValid] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Original puzzle animation state
   const [showSubmitButton, setShowSubmitButton] = useState(false);
   const [isSubtaskSelected, setIsSubtaskSelected] = useState(false);
   const [isOffsetApplied, setIsOffsetApplied] = useState(false);
 
+  // Load question when task/subtask changes
+  useEffect(() => {
+    if (selectedTaskIndex !== null && projectId) {
+      loadQuestion();
+    } else {
+      // Reset question state when no task is selected
+      setCurrentQuestion(null);
+      setExistingAnswer(undefined);
+      setDatasetSummary(null);
+      setCurrentAnswerData(null);
+      setIsAnswerValid(false);
+      setErrorMessage("");
+    }
+  }, [selectedTaskIndex, currentSubtaskIndex, projectId]);
+
+  const loadQuestion = async () => {
+    if (!projectId || selectedTaskIndex === null) return;
+
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      const response = await projectApi.getQuestion(
+        projectId,
+        selectedTaskIndex + 1, // Convert to 1-based indexing
+        currentSubtaskIndex
+      );
+
+      if (response.success) {
+        setCurrentQuestion(response.data.question);
+        setExistingAnswer(response.data.existingAnswer);
+        setDatasetSummary(response.data.datasetSummary);
+
+        // If there's an existing answer, the form should be valid
+        if (response.data.existingAnswer) {
+          setIsAnswerValid(true);
+        }
+      } else {
+        setErrorMessage(response.message);
+      }
+    } catch (error: any) {
+      console.error("Error loading question:", error);
+      setErrorMessage(error.message || "Failed to load question");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAnswerChange = (answerData: any) => {
+    setCurrentAnswerData(answerData);
+  };
+
+  const handleValidityChange = (isValid: boolean) => {
+    setIsAnswerValid(isValid);
+  };
+
+  const handleSubmitAnswer = async () => {
+    if (
+      !projectId ||
+      !currentQuestion ||
+      !currentAnswerData ||
+      !isAnswerValid
+    ) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMessage("");
+
+    try {
+      const user = getCurrentUser();
+      if (!user?.email) {
+        throw new Error("User not authenticated");
+      }
+
+      const submissionData = {
+        userEmail: user.email,
+        projectId: projectId,
+        taskIndex: currentQuestion.taskIndex,
+        subtaskIndex: currentQuestion.subtaskIndex,
+        questionId: currentQuestion.questionId,
+        answerType: currentAnswerData.answerType,
+        textAnswer: currentAnswerData.textAnswer,
+        selectedOption: currentAnswerData.selectedOption,
+        fileName: currentAnswerData.fileName,
+        fileUrl: currentAnswerData.fileUrl,
+      };
+
+      const response = await projectApi.submitAnswer(projectId, submissionData);
+
+      if (response.success) {
+        // Reset animation states
+        setShowSubmitButton(false);
+        setIsSubtaskSelected(false);
+        setIsOffsetApplied(false);
+
+        // Move to next subtask
+        onSubtaskClick(currentSubtaskIndex);
+      } else {
+        setErrorMessage(response.message);
+      }
+    } catch (error: any) {
+      console.error("Error submitting answer:", error);
+      setErrorMessage(error.message || "Failed to submit answer");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Original puzzle logic for when no task is selected
   if (selectedTaskIndex === null) {
     return (
       <div
         className="playground-section"
         style={{ paddingTop: `33vh`, height: "100%" }}
       >
-        {children}
-      </div>
-    );
-  }
-
-  // Special handling for first task (no subtasks)
-  if (selectedTaskIndex === 0) {
-    return (
-      <div
-        className="playground-section"
-        style={{ paddingTop: `33vh`, height: "100%" }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100%",
-          }}
-        >
-          <SubmitButton
-            onClick={() => onSubtaskClick(0)}
-            position="left"
-            taskIndex={0}
-            subtaskIndex={0}
-          />
+        <div className="no-task-selected">
+          <h3>Select a task to get started</h3>
+          <p>
+            Choose a puzzle piece from the progress section above to begin your
+            learning journey!
+          </p>
         </div>
         {children}
       </div>
     );
   }
 
+  // Special handling for first task (no subtasks) - show question instead of submit button
+  if (selectedTaskIndex === 0) {
+    return (
+      <div
+        className="playground-section question-mode"
+        style={{ paddingTop: `5vh`, height: "100%" }}
+      >
+        <div className="question-container-wrapper">
+          {isLoading ? (
+            <div className="loading-state">
+              <div className="loading-spinner"></div>
+              <p>Loading question...</p>
+            </div>
+          ) : errorMessage ? (
+            <div className="error-state">
+              <p className="error-message">{errorMessage}</p>
+              <button onClick={loadQuestion} className="retry-button">
+                Try Again
+              </button>
+            </div>
+          ) : currentQuestion ? (
+            <>
+              <QuestionRenderer
+                question={currentQuestion}
+                existingAnswer={existingAnswer}
+                datasetSummary={datasetSummary}
+                projectId={projectId!}
+                onAnswerChange={handleAnswerChange}
+                onValidityChange={handleValidityChange}
+              />
+
+              <div className="submit-section">
+                <SubmitButton
+                  onClick={handleSubmitAnswer}
+                  position="center"
+                  taskIndex={selectedTaskIndex}
+                  subtaskIndex={currentSubtaskIndex}
+                  disabled={!isAnswerValid || isSubmitting}
+                  loading={isSubmitting}
+                />
+
+                {errorMessage && (
+                  <div className="submit-error">{errorMessage}</div>
+                )}
+              </div>
+            </>
+          ) : null}
+        </div>
+        {children}
+      </div>
+    );
+  }
+
+  // For other tasks (2-5), restore original animation logic with question integration
   const colors = TASK_COLORS[selectedTaskIndex];
 
   const isSubtaskClickable = (index: number) => {
@@ -107,23 +273,71 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
     }
   };
 
-  const handleSubmit = () => {
-    setShowSubmitButton(false);
-    setIsSubtaskSelected(false);
-    setIsOffsetApplied(false);
-    onSubtaskClick(currentSubtaskIndex);
-  };
-
   const shiftDirection = getShiftDirection();
   const shouldShowSeparator = selectedTaskIndex !== null && isSubtaskSelected;
+
+  // Determine question position: left for odd subtasks (1,3), right for even subtasks (2,4)
+  const isQuestionOnLeft =
+    currentSubtaskIndex === 0 || currentSubtaskIndex === 2;
 
   return (
     <div
       className="playground-section"
       style={{ height: "100%", position: "relative" }}
     >
+      {/* Question Section - positioned based on subtask */}
+      {isSubtaskSelected && (
+        <div
+          className={`question-section ${
+            isQuestionOnLeft ? "question-left" : "question-right"
+          }`}
+        >
+          {isLoading ? (
+            <div className="loading-state">
+              <div className="loading-spinner"></div>
+              <p>Loading question...</p>
+            </div>
+          ) : errorMessage ? (
+            <div className="error-state">
+              <p className="error-message">{errorMessage}</p>
+              <button onClick={loadQuestion} className="retry-button">
+                Try Again
+              </button>
+            </div>
+          ) : currentQuestion ? (
+            <>
+              <QuestionRenderer
+                question={currentQuestion}
+                existingAnswer={existingAnswer}
+                datasetSummary={datasetSummary}
+                projectId={projectId!}
+                onAnswerChange={handleAnswerChange}
+                onValidityChange={handleValidityChange}
+              />
+
+              {/* Submit button inside question section */}
+              <div className="question-submit-section">
+                <SubmitButton
+                  onClick={handleSubmitAnswer}
+                  position="center"
+                  taskIndex={selectedTaskIndex}
+                  subtaskIndex={currentSubtaskIndex}
+                  disabled={!isAnswerValid || isSubmitting}
+                  loading={isSubmitting}
+                />
+
+                {errorMessage && (
+                  <div className="submit-error">{errorMessage}</div>
+                )}
+              </div>
+            </>
+          ) : null}
+        </div>
+      )}
+
       <div className="puzzle-area-wrapper">
         {shouldShowSeparator && <div className="vertical-separator" />}
+
         <div
           className={`puzzle-blocks-container${
             shiftDirection ? ` shift-${shiftDirection}` : ""
@@ -150,6 +364,7 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
             if (currentSubtaskIndex === 1 || currentSubtaskIndex === 2) {
               zIndex = i === 1 || i === 2 ? 2 : 1;
             }
+
             // Calculate extra offset for the selected subtask only, when shifted
             let extraTransform = "";
             if (
@@ -171,6 +386,7 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
                 extraTransform = " translateY(30%) translateX(30%)"; // subtask4: down & right
               }
             }
+
             // Compose the base transform for each piece
             let baseTransform = "";
             if (i === 0) {
@@ -182,9 +398,11 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
             } else if (i === 3) {
               baseTransform = "translateX(-11.5%)";
             }
+
             // Add margin for i === 0 and i === 3 as before
             const marginLeft = i === 0 ? "22%" : i === 3 ? "-22%" : undefined;
             const marginTop = i === 0 || i === 2 ? "4.3vh" : undefined;
+
             return (
               <div
                 key={`task${selectedTaskIndex + 1}subtask${i + 1}`}
@@ -216,17 +434,11 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
             );
           })}
         </div>
-        {showSubmitButton && (
-          <SubmitButton
-            onClick={handleSubmit}
-            position={
-              currentSubtaskIndex === 0 || currentSubtaskIndex === 2
-                ? "left"
-                : "right"
-            }
-            taskIndex={selectedTaskIndex}
-            subtaskIndex={currentSubtaskIndex}
-          />
+
+        {/* Original submit button removed from here since it's now inside question section */}
+
+        {errorMessage && showSubmitButton && !currentQuestion && (
+          <div className="submit-error-overlay">{errorMessage}</div>
         )}
       </div>
       {children}

@@ -1,25 +1,64 @@
 .submit-button {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 10px 20px;
+  padding: 12px 24px;
   background-color: #4CAF50;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
-  transition: background-color 0.3s;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  min-width: 100px;
 }
 
-.submit-button:hover {
+.submit-button:hover:not(.disabled):not(.loading) {
   background-color: #45a049;
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
 }
 
-.submit-button.left {
-  left: 20px;
+.submit-button:active:not(.disabled):not(.loading) {
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
-.submit-button.right {
-  right: 20px;
-} 
+.submit-button.disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.submit-button.loading {
+  cursor: not-allowed;
+  background-color: #5cbf60;
+}
+
+.submit-button.center {
+}
+
+.submit-button.center:hover:not(.disabled):not(.loading) {
+  /* Remove transform, only keep color/box-shadow if needed */
+}
+
+.submit-button.center:active:not(.disabled):not(.loading) {
+  /* Remove transform, only keep color/box-shadow if needed */
+}
+
+.submit-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

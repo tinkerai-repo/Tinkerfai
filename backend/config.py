@@ -13,6 +13,12 @@ class Settings(BaseSettings):
     # DynamoDB Configuration
     dynamodb_table_name: str = "tinkerfai-user-projects"
     
+    # S3 Configuration
+    s3_bucket_name: str = "tinkerfai-project-files"
+    
+    # OpenAI Configuration
+    openai_api_key: str
+    
     class Config:
         env_file = ".env"
 

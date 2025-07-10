@@ -1,3 +1,5 @@
+/* PlaygroundSection Styles - Fixed Version */
+
 .playground-section {
   background: #e0e0e0;
   width: 100%;
@@ -8,8 +10,22 @@
   position: relative;
   box-sizing: border-box;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  margin-top: 33vh; /* Start below the fixed progress section (8vh header + 25vh progress) */
+  padding-top: 2vh; /* Additional padding to create space below progress section */
+  height: calc(100vh - 33vh); /* Take remaining height after progress section */
+}
+
+.playground-section.question-mode {
+  align-items: flex-start;
+  margin-top: 33vh; /* Same positioning as regular playground */
+  padding-top: 7vh; /* Same additional padding */
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  overflow-y: auto;
+  justify-content: flex-start;
 }
 
 .vertical-separator {
@@ -51,4 +67,297 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Question Submit Section */
+.question-submit-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  flex-shrink: 0;
+}
+
+.question-submit-section .submit-button {
+  position: static;
+  transform: none;
+  margin: 0;
+  display: inline-block;
+}
+
+.question-submit-section .submit-error {
+  margin-top: 0;
+  text-align: center;
+}
+
+/* Question Section Positioning */
+.question-section {
+  position: fixed;
+  top: 35vh; /* Fixed start at 35vh */
+  bottom: 10vh; /* Fixed end at 90vh (100vh - 10vh) */
+  height: auto; /* Let top/bottom control height */
+  max-height: none; /* Remove max-height since we use top/bottom */
+  transform: none;
+  width: 40vw; /* 80% of 50vw */
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  padding-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  z-index: 2; /* Same as subtasks, lower than progress section */
+  overflow-y: auto; /* Scrollable content */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.question-section.question-left {
+  left: 5vw; /* 10% margin on left side */
+}
+
+.question-section.question-right {
+  right: 5vw; /* 10% margin on right side */
+}
+
+/* Question Content Container */
+.question-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Allow flexbox to shrink */
+  word-wrap: break-word; /* Prevent horizontal overflow */
+  overflow-wrap: break-word;
+}
+
+/* Ensure QuestionRenderer content doesn't overflow */
+.question-section * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Question System Styles */
+.question-container-wrapper {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.submit-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  margin-bottom: 10vh; /* Add 10vh padding below submit button */
+  position: relative;
+}
+
+.submit-error {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #f5c6cb;
+  font-size: 14px;
+  text-align: center;
+  max-width: 400px;
+}
+
+.submit-error-overlay {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #f5c6cb;
+  font-size: 14px;
+  text-align: center;
+  max-width: 400px;
+  z-index: 15;
+}
+
+/* Loading and Error States */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  height: 100%; /* Take full height of question container */
+  min-height: 200px; /* Minimum height for proper centering */
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.loading-state p {
+  color: #6c757d;
+  font-size: 16px;
+  margin: 0;
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  height: 100%; /* Take full height of question container */
+  min-height: 200px; /* Minimum height for proper centering */
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.retry-button {
+  padding: 8px 16px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.retry-button:hover {
+  background: #2980b9;
+}
+
+.no-task-selected {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+.no-task-selected h3 {
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-size: 24px;
+}
+
+.no-task-selected p {
+  font-size: 16px;
+  line-height: 1.5;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .question-section {
+    width: 35vw; /* Slightly smaller on medium screens */
+    top: 35vh; /* Keep fixed positioning */
+    bottom: 10vh; /* Keep fixed positioning */
+    padding: 24px; /* Smaller padding on smaller screens */
+  }
+  
+  .question-section.question-left {
+    left: 7.5vw; /* Larger margin on smaller screens */
+  }
+  
+  .question-section.question-right {
+    right: 7.5vw;
+  }
+}
+
+@media (max-width: 1000px) {
+  .playground-section {
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+  }
+  
+  .puzzle-area-wrapper {
+    position: relative;
+    margin-bottom: 30px;
+  }
+  
+  .question-section {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    transform: none;
+    width: 100%;
+    max-width: 500px;
+    margin-top: 30px;
+  }
+  
+  .question-section.question-left,
+  .question-section.question-right {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    transform: none;
+  }
+  
+  .puzzle-blocks-container {
+    transform: none !important;
+  }
+  
+  .vertical-separator {
+    width: 100%;
+    height: 3px;
+    top: auto;
+    left: 0;
+    transform: none;
+    background: repeating-linear-gradient(
+      to right,
+      #aaa,
+      #aaa 8px,
+      transparent 8px,
+      transparent 16px
+    );
+  }
+}
+
+@media (max-width: 768px) {
+  .playground-section.question-mode {
+    padding: 16px;
+  }
+  
+  .question-container-wrapper {
+    max-width: 100%;
+  }
+  
+  .question-section {
+    padding: 16px;
+    max-width: 100%;
+  }
+  
+  .puzzle-area-wrapper {
+    width: 90vw;
+    height: 90vw;
+    max-width: 350px;
+    max-height: 350px;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
