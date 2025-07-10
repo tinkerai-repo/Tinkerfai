@@ -15,16 +15,16 @@ run:
       value: "8000"
   secrets:
     - name: AWS_ACCESS_KEY_ID
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/aws-credentials-rvbiL:AWS_ACCESS_KEY_ID::"
+      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/aws-credentials-rvbiL:AWS_ACCESS_KEY_ID"
     - name: AWS_SECRET_ACCESS_KEY
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/aws-credentials-rvbiL:AWS_SECRET_ACCESS_KEY::"
+      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/aws-credentials-rvbiL:AWS_SECRET_ACCESS_KEY"
     - name: AWS_REGION
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/aws-credentials-rvbiL:AWS_REGION::"
+      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/aws-credentials-rvbiL:AWS_REGION"
     - name: COGNITO_USER_POOL_ID
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/app-config-3K6r3R:COGNITO_USER_POOL_ID::"
+      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/app-config-3K6r3R:COGNITO_USER_POOL_ID"
     - name: COGNITO_APP_CLIENT_ID
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/app-config-3K6r3R:COGNITO_APP_CLIENT_ID::"
+      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/app-config-3K6r3R:COGNITO_APP_CLIENT_ID"
     - name: S3_BUCKET_NAME
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/app-config-3K6r3R:S3_BUCKET_NAME::"
+      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/app-config-3K6r3R:S3_BUCKET_NAME"
     - name: OPENAI_API_KEY
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/openai-phKMLb:OPENAI_API_KEY::"
+      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/openai-phKMLb:OPENAI_API_KEY"
