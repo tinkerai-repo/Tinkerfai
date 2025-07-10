@@ -3,9 +3,9 @@ runtime: docker
 build:
   commands:
     build:
-      - echo "No build commands required for Docker"
+      - echo "Building with Docker"
 run:
-  runtime-version: latest
+  runtime-version: 1.0
   command: python main.py
   network:
     port: 8000
