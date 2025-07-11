@@ -11,7 +11,8 @@ const getApiBaseUrl = (): string => {
   // In production, use the current domain
   const protocol = window.location.protocol;
   const host = window.location.host;
-  return `${protocol}//${host}/api`;
+  const apiUrl = import.meta.env.REACT_APP_API_URL || `${protocol}//${host}`;
+  return `${apiUrl}/api`;
 };
 
 export const API_BASE_URL = getApiBaseUrl();
