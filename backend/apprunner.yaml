@@ -17,18 +17,18 @@ run:
       value: "8080"
   secrets:
     - name: AWS_ACCESS_KEY_ID
-      value_from: "/tinkerfai/aws-access-key-id"
+      value-from: "/tinkerfai/aws-access-key-id"
     - name: AWS_SECRET_ACCESS_KEY
-      value_from: "/tinkerfai/aws-secret-access-key"
+      value-from: "/tinkerfai/aws-secret-access-key"
     - name: AWS_REGION
-      value_from: "/tinkerfai/aws-region"
+      value-from: "/tinkerfai/aws-region"
     - name: COGNITO_APP_CLIENT_ID
-      value_from: "/tinkerfai/cognito-app-client-id"
+      value-from: "/tinkerfai/cognito-app-client-id"
     - name: COGNITO_USER_POOL_ID
-      value_from: "/tinkerfai/cognito-user-pool-id"
+      value-from: "/tinkerfai/cognito-user-pool-id"
     - name: DYNAMODB_TABLE_NAME
-      value_from: "/tinkerfai/dynamodb-table-name"
+      value-from: "/tinkerfai/dynamodb-table-name"
     - name: S3_BUCKET_NAME
-      value_from: "/tinkerfai/s3-bucket-name"
+      value-from: "/tinkerfai/s3-bucket-name"
     - name: OPENAI_API_KEY
-      value_from: "/tinkerfai/openai-api-key"
+      value-from: "/tinkerfai/openai-api-key"
