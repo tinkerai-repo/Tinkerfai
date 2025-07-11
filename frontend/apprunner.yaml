@@ -11,5 +11,5 @@ run:
   network:
     port: 8080
   env:
-    - name: REACT_APP_API_URL
+    - name: VITE_API_URL
       value: "https://d843pnjrij.us-east-2.awsapprunner.com"

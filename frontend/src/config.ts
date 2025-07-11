@@ -12,7 +12,7 @@ const getApiBaseUrl = (): string => {
   console.log('=== API Configuration Debug ===');
   console.log('import.meta.env.DEV:', import.meta.env.DEV);
   console.log('import.meta.env.PROD:', import.meta.env.PROD);
-  console.log('import.meta.env.REACT_APP_API_URL:', import.meta.env.REACT_APP_API_URL);
+  console.log('import.meta.env.VITE_API_URL:', import.meta.env.VITE_API_URL);
   console.log('window.location.protocol:', window.location.protocol);
   console.log('window.location.host:', window.location.host);
   
