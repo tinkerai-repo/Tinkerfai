@@ -19,7 +19,7 @@ const getApiBaseUrl = (): string => {
   // In production, use the environment variable or fallback
   const protocol = window.location.protocol;
   const host = window.location.host;
-  const apiUrl = import.meta.env.REACT_APP_API_URL || `${protocol}//${host}`;
+  const apiUrl = import.meta.env.VITE_API_URL || `${protocol}//${host}`;
   
   console.log('Final apiUrl:', apiUrl);
   console.log('Final API_BASE_URL:', `${apiUrl}/api`);
