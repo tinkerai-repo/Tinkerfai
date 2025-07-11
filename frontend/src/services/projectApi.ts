@@ -1,6 +1,5 @@
 // API service for project-related operations with question system
-
-const API_BASE_URL = 'http://localhost:8000/api';
+import { API_BASE_URL } from '../config';
 
 // Existing types
 export interface Project {

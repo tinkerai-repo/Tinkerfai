@@ -6,6 +6,7 @@ import ForgotPassword from "./ForgotPassword";
 import SignUp from "./SignUp";
 import googleIcon from "../assets/google_icon.png";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const Login = () => {
   // Form states
@@ -74,7 +75,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/signin", {
+      const response = await fetch(`${API_BASE_URL}/signin`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

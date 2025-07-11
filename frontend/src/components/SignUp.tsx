@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./SignUp.css";
 import logo from "../assets/tinkerfai-logo.png";
+import { API_BASE_URL } from "../config";
 import googleIcon from "../assets/google_icon.png";
 
 interface SignUpProps {
@@ -48,7 +49,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignInClick }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/signup", {
+      const response = await fetch(`${API_BASE_URL}/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -92,7 +93,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignInClick }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/confirm-signup", {
+      const response = await fetch(`${API_BASE_URL}/confirm-signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -128,16 +129,13 @@ const SignUp: React.FC<SignUpProps> = ({ onSignInClick }) => {
     setErrorMessage("");
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/resend-confirmation",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/resend-confirmation`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
 
       const data = await response.json();
 

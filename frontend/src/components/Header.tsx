@@ -3,6 +3,7 @@ import "./Header.css";
 import logo from "../assets/tinkerfai-logo.png";
 import coinIcon from "../assets/coin-icon.png";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -31,7 +32,7 @@ const Header: React.FC = () => {
     try {
       // Optionally, send refreshToken or accessToken to backend for logout
       const refreshToken = localStorage.getItem("refreshToken");
-      await fetch("http://localhost:8000/api/logout", {
+      await fetch(`${API_BASE_URL}/logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),

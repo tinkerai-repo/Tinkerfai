@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./ForgotPassword.css";
 import logo from "../assets/tinkerfai-logo.png";
+import { API_BASE_URL } from "../config";
 
 interface ForgotPasswordProps {
   onBackToLogin: () => void;
@@ -37,16 +38,13 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBackToLogin }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/forgot-password",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
 
       const data = await response.json();
 
@@ -86,7 +84,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBackToLogin }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/reset-password", {
+      const response = await fetch(`${API_BASE_URL}/reset-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -124,16 +122,13 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBackToLogin }) => {
     setErrorMessage("");
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/forgot-password",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
 
       const data = await response.json();
 
