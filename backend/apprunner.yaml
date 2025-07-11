@@ -6,25 +6,29 @@ build:
       - pip3 install -r requirements.txt
 run:
   runtime-version: 3.11
+  pre-run:
+    - pip3 install -r requirements.txt
   command: python3 main.py
   network:
-    port: 8000
+    port: 8080
     env: PORT
   env:
     - name: PORT
-      value: "8000"
+      value: "8080"
   secrets:
     - name: AWS_ACCESS_KEY_ID
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/aws-access-key-id-RWsHFE"
+      value_from: "/tinkerfai/aws-access-key-id"
     - name: AWS_SECRET_ACCESS_KEY
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/aws-secret-access-key-4ApHsk"
+      value_from: "/tinkerfai/aws-secret-access-key"
     - name: AWS_REGION
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/aws-region-Hh8oGc"
-    - name: COGNITO_USER_POOL_ID
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/cognito-user-pool-id-q0o1VQ"
+      value_from: "/tinkerfai/aws-region"
     - name: COGNITO_APP_CLIENT_ID
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/cognito-app-client-id-Zt7lLq"
+      value_from: "/tinkerfai/cognito-app-client-id"
+    - name: COGNITO_USER_POOL_ID
+      value_from: "/tinkerfai/cognito-user-pool-id"
+    - name: DYNAMODB_TABLE_NAME
+      value_from: "/tinkerfai/dynamodb-table-name"
     - name: S3_BUCKET_NAME
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/s3-bucket-name-9jZ3BN"
+      value_from: "/tinkerfai/s3-bucket-name"
     - name: OPENAI_API_KEY
-      value-from: "arn:aws:secretsmanager:us-east-2:486660158371:secret:tinkerfai/openai-api-key-Xq6FAj"
+      value_from: "/tinkerfai/openai-api-key"
