@@ -27,3 +27,12 @@ const getApiBaseUrl = (): string => {
   
   return `${apiUrl}/api`;
 };
+
+export const API_BASE_URL = getApiBaseUrl();
+
+// Environment-specific configuration
+export const config = {
+  apiBaseUrl: API_BASE_URL,
+  isDevelopment: import.meta.env.DEV,
+  isProduction: import.meta.env.PROD,
+}; 
