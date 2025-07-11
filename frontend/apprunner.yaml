@@ -1,13 +1,16 @@
 version: 1.0
 runtime: nodejs22
+
 build:
   env:
-    VITE_API_URL: "https://d843pnjrij.us-east-2.awsapprunner.com"
+    - name: VITE_API_URL
+      value: "https://d843pnjrij.us-east-2.awsapprunner.com"
   commands:
     pre-build:
       - npm install
     build:
       - npm run build
+
 run:
   runtime-version: 22.16.0
   command: npx serve -s dist -l 8080
