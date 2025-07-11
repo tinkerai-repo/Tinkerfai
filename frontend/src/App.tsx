@@ -1,8 +1,8 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/Login";
-import Dashboard from "./components/Dashboard";
 import Project from "./Project";
+import Dashboard from "./components/Dashboard";
 
 // ProtectedRoute component
 function ProtectedRoute({ children }: { children: JSX.Element }) {
