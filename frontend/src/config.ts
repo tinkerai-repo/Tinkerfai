@@ -13,15 +13,19 @@ const getApiBaseUrl = (): string => {
   console.log('import.meta.env.DEV:', import.meta.env.DEV);
   console.log('import.meta.env.PROD:', import.meta.env.PROD);
   console.log('import.meta.env.VITE_API_URL:', import.meta.env.VITE_API_URL);
+  console.log('window.location.protocol:', window.location.protocol);
+  console.log('window.location.host:', window.location.host);
   
-  // TEMPORARY: Hardcode the backend URL
-  const hardcodedBackendUrl = 'https://d843pnjrij.us-east-2.awsapprunner.com';
+  // In production, use the environment variable or fallback
+  const protocol = window.location.protocol;
+  const host = window.location.host;
+  const apiUrl = import.meta.env.VITE_API_URL || `${protocol}//${host}`;
   
-  console.log('Using hardcoded backend URL:', hardcodedBackendUrl);
-  console.log('Final API_BASE_URL:', `${hardcodedBackendUrl}/api`);
+  console.log('Final apiUrl:', apiUrl);
+  console.log('Final API_BASE_URL:', `${apiUrl}/api`);
   console.log('=== End Debug ===');
   
-  return `${hardcodedBackendUrl}/api`;
+  return `${apiUrl}/api`;
 };
 
 export const API_BASE_URL = getApiBaseUrl();
