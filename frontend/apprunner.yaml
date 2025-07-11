@@ -1,12 +1,12 @@
 version: 1.0
-runtime: nodejs22
+runtime: nodejs18
 build:
   commands:
     build:
       - npm install
       - npm run build
 run:
-  runtime-version: 22.14.0
+  runtime-version: 18.20.8
   command: npx serve -s dist -l 8080
   network:
     port: 8080
