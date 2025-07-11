@@ -1,11 +1,11 @@
 // Configuration for API endpoints
-// In development, uses localhost:8000
+// In development, uses localhost:8080
 // In production, uses the actual domain
 
 const getApiBaseUrl = (): string => {
   // Check if we're in development mode
   if (import.meta.env.DEV) {
-    return 'http://localhost:8000/api';
+    return 'http://localhost:8080/api';
   }
   
   // In production, use the current domain
