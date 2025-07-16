@@ -34,29 +34,38 @@ const puzzleData = (
 ): PuzzlePieceData[] => [
   {
     type: "task-start",
-    color: "#FF6B6B",
+    color: "#FFCB05", // Task 1
     height: `${PUZZLE_HEIGHT_VH(heightPercent)}vh`,
   },
   {
     type: "task-middle",
-    color: "#4ECDC4",
+    color: "#F1969B", // Task 2
     height: `${PUZZLE_HEIGHT_VH(heightPercent)}vh`,
   },
   {
     type: "task-middle",
-    color: "#FFD166",
+    color: "#5AA888", // Task 3
     height: `${PUZZLE_HEIGHT_VH(heightPercent)}vh`,
   },
   {
     type: "task-middle",
-    color: "#6A4C93",
+    color: "#B184E5", // Task 4
     height: `${PUZZLE_HEIGHT_VH(heightPercent)}vh`,
   },
   {
     type: "task-end",
-    color: "#FF9F1C",
+    color: "#61A6B7", // Task 5
     height: `${LAST_PIECE_HEIGHT_VH(heightPercent, unlockedIndex === 4)}vh`,
   },
+];
+
+// Add stage text data
+const STAGE_TEXT = [
+  { title: "Stage 0:", subtitle: "Conceptualize", color: "#947800" },
+  { title: "Stage 1:", subtitle: "Identify\nGoals", color: "#A04A4A" },
+  { title: "Stage 2:", subtitle: "Define\nInputs", color: "#2B6B57" },
+  { title: "Stage 3:", subtitle: "Develop\nModel", color: "#6A4C93" },
+  { title: "Stage 4:", subtitle: "Evaluate", color: "#3B5A68" },
 ];
 
 const ProgressSection: React.FC<ProgressSectionProps> = ({
@@ -285,6 +294,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          position: "relative",
         }}
       >
         <PuzzlePiece
@@ -293,6 +303,52 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({
           height={piece.height}
           className={isTaskClickable(idx) ? "puzzle-piece-hoverable" : ""}
         />
+        {/* Overlay stage text */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: idx === 0 ? "-24%" : idx > 0 && idx < 4 ? "-18%" : "-4%",
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+            zIndex: 2,
+            padding: "0 14%",
+          }}
+        >
+          <div
+            style={{
+              fontWeight: 700,
+              fontSize: heightPercent === 50 ? "2.5vh" : "2.1vh",
+              color: STAGE_TEXT[idx].color,
+              textAlign: "center",
+              marginBottom: heightPercent === 50 ? "0.7vh" : "0.5vh",
+              textShadow: "0 2px 8px #fff8, 0 0px 2px #fff8",
+              lineHeight: 1.1,
+              wordBreak: "break-word",
+            }}
+          >
+            {STAGE_TEXT[idx].title}
+          </div>
+          <div
+            style={{
+              fontWeight: 600,
+              fontSize: heightPercent === 50 ? "1.8vh" : "1.6vh",
+              color: STAGE_TEXT[idx].color,
+              textAlign: "center",
+              whiteSpace: "pre-line",
+              textShadow: "0 2px 8px #fff8, 0 0px 2px #fff8",
+              lineHeight: 1.2,
+              wordBreak: "break-word",
+            }}
+          >
+            {STAGE_TEXT[idx].subtitle}
+          </div>
+        </div>
       </div>
     );
   };

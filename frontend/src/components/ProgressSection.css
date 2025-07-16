@@ -1,5 +1,5 @@
 .progress-section {
-  background: #888;
+  background: #FFFAED;
   position: fixed;
   top: 8vh;
   left: 0;
@@ -87,7 +87,7 @@
 }
 
 .vertical-dashed-separator {
-  border-left: 2px dashed rgba(255,255,255,0.5);
+  border-left: 2px dashed #6C6C6C;
   height: 100%;
   position: absolute;
   top: 0;

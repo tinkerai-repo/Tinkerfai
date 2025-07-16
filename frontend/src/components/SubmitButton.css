@@ -22,7 +22,7 @@
 }
 
 .submit-button.disabled {
-  background-color: #cccccc;
+  background-color: #A9A8A7;
   cursor: not-allowed;
   box-shadow: none;
 }

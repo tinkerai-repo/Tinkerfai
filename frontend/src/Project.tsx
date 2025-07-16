@@ -158,6 +158,7 @@ function Project() {
           currentSubtaskIndex={currentSubtaskIndex}
           onSubtaskClick={handleSubtaskClick}
           completedSubtasks={completedSubtasks}
+          unlockedIndex={unlockedIndex}
         />
         <DragHandleOverlay
           top={`calc(8vh + ${progressSectionHeight}vh)`}

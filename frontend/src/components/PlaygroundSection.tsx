@@ -43,6 +43,7 @@ interface PlaygroundSectionProps {
   onSubtaskClick: (subtaskIndex: number) => void;
   completedSubtasks: boolean[][];
   children?: React.ReactNode;
+  unlockedIndex?: number;
 }
 
 const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
@@ -51,6 +52,7 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
   onSubtaskClick,
   completedSubtasks,
   children,
+  unlockedIndex = 0,
 }) => {
   const { projectId } = useParams<{ projectId: string }>();
 
@@ -180,17 +182,26 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
 
   // Original puzzle logic for when no task is selected
   if (selectedTaskIndex === null) {
+    let title = "Select a task to get started";
+    let desc =
+      "Choose a puzzle piece from the progress section above to begin your\nlearning journey!";
+    if (unlockedIndex === 0) {
+      title = "Select first task to get started";
+      desc =
+        "Choose a puzzle piece from the progress section above to begin your\nlearning journey!";
+    } else {
+      title = "Select next task to get started";
+      desc =
+        "Choose the next puzzle piece from the progress section above to continue your\nlearning journey!";
+    }
     return (
       <div
         className="playground-section"
         style={{ paddingTop: `33vh`, height: "100%" }}
       >
         <div className="no-task-selected">
-          <h3>Select a task to get started</h3>
-          <p>
-            Choose a puzzle piece from the progress section above to begin your
-            learning journey!
-          </p>
+          <h3>{title}</h3>
+          <p>{desc}</p>
         </div>
         {children}
       </div>
@@ -422,6 +433,36 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
                 }}
                 onClick={() => handleSubtaskClick(i)}
               >
+                {/* Centered Subtask label with line break */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 400,
+                    fontSize: "1.8vh",
+                    color: "#222",
+                    zIndex: 3,
+                    pointerEvents: "none",
+                    whiteSpace: "pre-line",
+                    transform:
+                      i === 0
+                        ? "translate(-9%, -9%)"
+                        : i === 3
+                        ? "translate(9%, 9%)"
+                        : undefined,
+                  }}
+                >
+                  <span style={{ width: "100%", textAlign: "center" }}>
+                    {`Sub\ntask ${i + 1}`.replace("\\n", "\n")}
+                  </span>
+                </div>
                 <PuzzlePiece
                   type={type}
                   color={colors[i]}
