@@ -138,7 +138,7 @@ class QuestionService:
                     summary = self.s3.get_dataset_summary(file_key)
                     if not summary:
                         return {"success": False, "message": "Failed to generate dataset summary"}
-                    summary_text = self._format_dataset_summary(summary)
+                    # summary_text = self._format_dataset_summary(summary)
                     return {
                         "success": True,
                         "question": QuestionResponse(
@@ -146,7 +146,7 @@ class QuestionService:
                             taskIndex=task_index,
                             subtaskIndex=subtask_index,
                             questionType=QuestionType.READONLY,
-                            questionText=f"Review Dataset Summary:\n\n{summary_text}\n\nClick submit when you're ready to proceed to the next step.",
+                            questionText="Review your dataset summary below. Click submit when you're ready to proceed to the next step.",
                             isRequired=False
                         ),
                         "datasetSummary": summary

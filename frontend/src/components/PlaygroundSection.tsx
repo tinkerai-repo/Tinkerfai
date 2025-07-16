@@ -10,6 +10,7 @@ import {
   Answer,
   getCurrentUser,
 } from "../services/projectApi";
+import SubtaskCompleted from "../assets/SubtaskCompleted";
 
 export type PuzzlePieceType =
   | "subtask-1"
@@ -18,23 +19,36 @@ export type PuzzlePieceType =
   | "subtask-4";
 
 const TASK_COLORS = [
-  // Pink (First task - no subtasks)
-  ["#FF6B6B", "#FF6B6B", "#FF6B6B", "#FF6B6B"],
-  // Blue-Green
-  ["#11999E", "#6FE7DD", "#6FE7DD", "#11999E"],
-  // Yellow
-  ["#FFD166", "#FFE299", "#FFE299", "#FFD166"],
-  // Purple
-  ["#6A4C93", "#A084CA", "#A084CA", "#6A4C93"],
-  // Orange
-  ["#FF9F1C", "#FFB347", "#FFB347", "#FF9F1C"],
+  // Task 1 (Yellow)
+  ["#FFCB05", "#FFCB05", "#FFCB05", "#FFCB05"],
+  // Task 2 (Pink)
+  ["#F1969B", "#F1969B", "#F1969B", "#F1969B"],
+  // Task 3 (Green)
+  ["#5AA888", "#5AA888", "#5AA888", "#5AA888"],
+  // Task 4 (Purple)
+  ["#B184E5", "#B184E5", "#B184E5", "#B184E5"],
+  // Task 5 (Blue)
+  ["#61A6B7", "#61A6B7", "#61A6B7", "#61A6B7"],
 ];
+
+// Bright and dim color mappings for tasks 2-5
+const BRIGHT_COLORS = ["#F1969B", "#5AA888", "#B184E5", "#61A6B7"];
+const DIM_COLORS = ["#D5C89A", "#CCB3B4", "#9AAFA6", "#BBAACF", "#99B6BD"];
 
 const SUBTASK_TYPES: PuzzlePieceType[] = [
   "subtask-1",
   "subtask-2",
   "subtask-3",
   "subtask-4",
+];
+
+// Add STAGE_TEXT colors for tick color reference
+const STAGE_TEXT = [
+  { title: "Stage 0:", subtitle: "Conceptualize", color: "#947800" },
+  { title: "Stage 1:", subtitle: "Identify\nGoals", color: "#A04A4A" },
+  { title: "Stage 2:", subtitle: "Define\nInputs", color: "#2B6B57" },
+  { title: "Stage 3:", subtitle: "Develop\nModel", color: "#6A4C93" },
+  { title: "Stage 4:", subtitle: "Evaluate", color: "#3B5A68" },
 ];
 
 interface PlaygroundSectionProps {
@@ -376,6 +390,20 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
               zIndex = i === 1 || i === 2 ? 2 : 1;
             }
 
+            // Calculate color for each subtask
+            let color = colors[i];
+            if (selectedTaskIndex > 0) {
+              // Only for tasks 2-5
+              const brightIdx = selectedTaskIndex - 1;
+              const dimIdx = selectedTaskIndex;
+              const isCompleted = completedSubtasks[selectedTaskIndex]?.[i];
+              const isClickable = i === currentSubtaskIndex;
+              color =
+                isCompleted || isClickable
+                  ? BRIGHT_COLORS[brightIdx]
+                  : DIM_COLORS[dimIdx];
+            }
+
             // Calculate extra offset for the selected subtask only, when shifted
             let extraTransform = "";
             if (
@@ -414,6 +442,10 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
             const marginLeft = i === 0 ? "22%" : i === 3 ? "-22%" : undefined;
             const marginTop = i === 0 || i === 2 ? "4.3vh" : undefined;
 
+            const isCompleted =
+              selectedTaskIndex > 0 &&
+              completedSubtasks[selectedTaskIndex]?.[i];
+
             return (
               <div
                 key={`task${selectedTaskIndex + 1}subtask${i + 1}`}
@@ -433,43 +465,65 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
                 }}
                 onClick={() => handleSubtaskClick(i)}
               >
-                {/* Centered Subtask label with line break */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: 400,
-                    fontSize: "1.8vh",
-                    color: "#222",
-                    zIndex: 3,
-                    pointerEvents: "none",
-                    whiteSpace: "pre-line",
-                    transform:
-                      i === 0
-                        ? "translate(-9%, -9%)"
-                        : i === 3
-                        ? "translate(9%, 9%)"
-                        : undefined,
-                  }}
-                >
-                  <span style={{ width: "100%", textAlign: "center" }}>
-                    {`Sub\ntask ${i + 1}`.replace("\\n", "\n")}
-                  </span>
-                </div>
+                {/* Centered Subtask label or tick icon */}
+                {isCompleted ? (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: i === 0 ? "-9%" : 0,
+                      left: i === 0 ? "-9%" : 0,
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 3,
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <SubtaskCompleted
+                      size="27%"
+                      fill={STAGE_TEXT[selectedTaskIndex]?.color || "#333"}
+                    />
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: 400,
+                      fontSize: "1.8vh",
+                      color: "#222",
+                      zIndex: 3,
+                      pointerEvents: "none",
+                      whiteSpace: "pre-line",
+                      transform:
+                        i === 0
+                          ? "translate(-9%, -9%)"
+                          : i === 3
+                          ? "translate(9%, 9%)"
+                          : undefined,
+                    }}
+                  >
+                    <span style={{ width: "100%", textAlign: "center" }}>
+                      {`Sub\ntask ${i + 1}`.replace("\\n", "\n")}
+                    </span>
+                  </div>
+                )}
                 <PuzzlePiece
                   type={type}
-                  color={colors[i]}
+                  color={color}
                   height={i === 0 || i === 3 ? "19.35vh" : "15vh"}
-                  className={
-                    i === currentSubtaskIndex ? "puzzle-piece-hoverable" : ""
-                  }
+                  className={`subtask-piece${
+                    i === currentSubtaskIndex ? " puzzle-piece-hoverable" : ""
+                  }`}
                 />
               </div>
             );

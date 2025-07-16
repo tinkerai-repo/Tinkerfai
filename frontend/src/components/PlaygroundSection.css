@@ -265,6 +265,11 @@
   margin: 0 auto;
 }
 
+.subtask-piece {
+  /* Add a white stroke around the SVG puzzle piece */
+  filter: drop-shadow(0 0 0.5vh #fff) drop-shadow(0 0 1.2vh #fff);
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .question-section {
