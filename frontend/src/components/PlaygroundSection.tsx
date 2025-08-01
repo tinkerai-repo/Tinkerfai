@@ -47,7 +47,7 @@ const STAGE_TEXT = [
   { title: "Stage 0:", subtitle: "Conceptualize", color: "#947800" },
   { title: "Stage 1:", subtitle: "Identify\nGoals", color: "#A04A4A" },
   { title: "Stage 2:", subtitle: "Define\nInputs", color: "#2B6B57" },
-  { title: "Stage 3:", subtitle: "Develop\nModel", color: "#6A4C93" },
+  { title: "Stage 3:", subtitle: "Develop\nModel", color: "#6A4C93" }, // NEW: Task 3 color
   { title: "Stage 4:", subtitle: "Evaluate", color: "#3B5A68" },
 ];
 
@@ -169,6 +169,7 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
         answerType: currentAnswerData.answerType,
         textAnswer: currentAnswerData.textAnswer,
         selectedOption: currentAnswerData.selectedOption,
+        selectedOptions: currentAnswerData.selectedOptions, // NEW: Include multiselect
         fileName: currentAnswerData.fileName,
         fileUrl: currentAnswerData.fileUrl,
       };
@@ -275,7 +276,7 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
     );
   }
 
-  // For other tasks (2-5), restore original animation logic with question integration
+  // For other tasks (2-5), including NEW Task 3, restore original animation logic with question integration
   const colors = TASK_COLORS[selectedTaskIndex];
 
   const isSubtaskClickable = (index: number) => {
@@ -393,7 +394,7 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
             // Calculate color for each subtask
             let color = colors[i];
             if (selectedTaskIndex > 0) {
-              // Only for tasks 2-5
+              // Only for tasks 2-5 (including NEW Task 3)
               const brightIdx = selectedTaskIndex - 1;
               const dimIdx = selectedTaskIndex;
               const isCompleted = completedSubtasks[selectedTaskIndex]?.[i];

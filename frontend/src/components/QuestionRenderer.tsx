@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from "react";
-import {
-  Question,
-  Answer,
-  QuestionType,
-  DatasetSummary,
-} from "../services/projectApi";
 import TextQuestion from "./QuestionComponents/TextQuestion";
 import RadioQuestion from "./QuestionComponents/RadioQuestion";
 import FileQuestion from "./QuestionComponents/FileQuestion";
 import ReadOnlyQuestion from "./QuestionComponents/ReadOnlyQuestion";
+import MultiSelectQuestion from "./QuestionComponents/MultiSelectQuestion"; // NEW
+import { Question, Answer, QuestionType } from "../services/projectApi";
 
 interface QuestionRendererProps {
   question: Question;
   existingAnswer?: Answer;
-  datasetSummary?: DatasetSummary;
+  datasetSummary?: any;
   projectId: string;
-  onAnswerChange: (answerData: any) => void;
+  onAnswerChange: (answer: any) => void;
   onValidityChange: (isValid: boolean) => void;
 }
 
@@ -32,71 +28,84 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   useEffect(() => {
     // Initialize with existing answer if available
     if (existingAnswer) {
+      let initialAnswer: any = {};
+
       switch (question.questionType) {
         case "text":
-          setCurrentAnswer(existingAnswer.textAnswer || "");
-          onAnswerChange({
+          initialAnswer = {
             answerType: "text",
             textAnswer: existingAnswer.textAnswer || "",
-          });
+          };
           break;
         case "radio":
-          setCurrentAnswer(existingAnswer.selectedOption || "");
-          onAnswerChange({
+          initialAnswer = {
             answerType: "radio",
             selectedOption: existingAnswer.selectedOption || "",
-          });
+          };
+          break;
+        case "multiselect": // NEW: Handle multiselect
+          initialAnswer = {
+            answerType: "multiselect",
+            selectedOptions: existingAnswer.selectedOptions || [],
+          };
           break;
         case "file":
-          const fileData = {
-            fileName: existingAnswer.fileName || "",
-            fileUrl: existingAnswer.fileUrl || "",
-          };
-          setCurrentAnswer(fileData);
-          onAnswerChange({
+          initialAnswer = {
             answerType: "file",
             fileName: existingAnswer.fileName || "",
             fileUrl: existingAnswer.fileUrl || "",
-          });
+          };
           break;
         case "readonly":
-          onAnswerChange({
+          initialAnswer = {
             answerType: "readonly",
-          });
+          };
           break;
       }
+
+      setCurrentAnswer(initialAnswer);
+      onAnswerChange(initialAnswer);
     }
   }, [existingAnswer, question.questionType, onAnswerChange]);
 
   const handleAnswerChange = (answer: any) => {
-    setCurrentAnswer(answer);
+    let formattedAnswer: any = {};
 
     switch (question.questionType) {
       case "text":
-        onAnswerChange({
+        formattedAnswer = {
           answerType: "text",
           textAnswer: answer,
-        });
+        };
         break;
       case "radio":
-        onAnswerChange({
+        formattedAnswer = {
           answerType: "radio",
           selectedOption: answer,
-        });
+        };
+        break;
+      case "multiselect": // NEW: Handle multiselect
+        formattedAnswer = {
+          answerType: "multiselect",
+          selectedOptions: answer,
+        };
         break;
       case "file":
-        onAnswerChange({
+        formattedAnswer = {
           answerType: "file",
           fileName: answer.fileName,
           fileUrl: answer.fileUrl,
-        });
+        };
         break;
       case "readonly":
-        onAnswerChange({
+        formattedAnswer = {
           answerType: "readonly",
-        });
+        };
         break;
     }
+
+    setCurrentAnswer(formattedAnswer);
+    onAnswerChange(formattedAnswer);
   };
 
   const renderQuestion = () => {
@@ -124,6 +133,18 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           />
         );
 
+      case "multiselect": // NEW: Handle multiselect
+        return (
+          <MultiSelectQuestion
+            questionText={question.questionText}
+            options={question.options || []}
+            initialValue={existingAnswer?.selectedOptions || []}
+            isRequired={question.isRequired}
+            onAnswerChange={handleAnswerChange}
+            onValidityChange={onValidityChange}
+          />
+        );
+
       case "file":
         return (
           <FileQuestion
@@ -134,7 +155,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
             fileTypes={question.fileTypes || [".csv"]}
             maxFileSize={question.maxFileSize || 5 * 1024 * 1024}
             initialValue={
-              existingAnswer
+              existingAnswer?.fileName && existingAnswer?.fileUrl
                 ? {
                     fileName: existingAnswer.fileName,
                     fileUrl: existingAnswer.fileUrl,
@@ -153,15 +174,14 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
             questionText={question.questionText}
             datasetSummary={datasetSummary}
             onValidityChange={onValidityChange}
+            onAnswerChange={handleAnswerChange}
           />
         );
 
       default:
         return (
-          <div className="question-container">
-            <div className="question-text">
-              Unsupported question type: {question.questionType}
-            </div>
+          <div className="error-state">
+            <p>Unknown question type: {question.questionType}</p>
           </div>
         );
     }

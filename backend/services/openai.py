@@ -6,7 +6,7 @@ from typing import Dict, List, Any, Optional, Tuple
 from config import settings
 from models import (
     QuestionType, AIQuestionGenerationResponse, AITargetColumnResponse, 
-    AIProblemTypeResponse
+    AIProblemTypeResponse, AIFeatureSelectionResponse  # NEW: Added
 )
 import re
 
@@ -118,6 +118,16 @@ Be confident in your assessment and educational in your explanation.
                     )
                 else:
                     raise ValueError(f"Unknown subtask index: {subtask_index}")
+            
+            # NEW: Task 3 handling
+            elif task_index == 3:
+                # Task 3 questions are handled in question.py with static templates
+                # This is kept for future dynamic generation if needed
+                return AIQuestionGenerationResponse(
+                    success=True,
+                    question="Task 3 question placeholder",
+                    questionType=QuestionType.TEXT
+                )
             else:
                 raise ValueError(f"Unknown task index: {task_index}")
 
@@ -175,7 +185,7 @@ Sample data (first 5 rows):
 {sample_data}
 
 Determine if this data is:
-1. A valid dataset (not gibberish)
+1. A valid dataset (not gibberish); don't worry about missing or null values (we will handle that in the next step)
 2. Suitable for machine learning
 3. Has meaningful column names
 4. Contains data that matches the user's project goals
@@ -241,6 +251,120 @@ Analyze the following dataset for the user's project.\n\nThe full dataset summar
             return AITargetColumnResponse(
                 success=False,
                 error=f"Failed to analyze columns: {str(e)}"
+            )
+
+    def generate_feature_columns(self, csv_data: List[Dict[str, Any]], target_column: str, context: str) -> AIFeatureSelectionResponse:
+        """Generate suitable feature columns for prediction using GPT-4o"""
+        try:
+            columns = list(csv_data[0].keys()) if csv_data else []
+            # Remove target column from available features
+            available_features = [col for col in columns if col != target_column]
+            
+            messages = [
+                {
+                    "role": "system",
+                    "content": """You are a machine learning expert. Your task is to analyze a dataset and recommend which columns would be good features/predictors for a given target variable.
+
+    Return your response in this exact JSON format:
+    {
+        "feature_columns": ["col1", "col2", "col3"]
+    }
+
+    Only include columns that would likely be useful predictors. Exclude:
+    - ID columns, names, or unique identifiers
+    - Columns that would cause data leakage (future information)
+    - Columns with too many missing values
+    - Irrelevant columns for the prediction task"""
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+    Analyze this dataset for feature selection:
+
+    Context: {context}
+
+    Target column to predict: {target_column}
+    Available feature columns: {available_features}
+
+    Sample data (first 5 rows):
+    {json.dumps(csv_data[:5], indent=2)}
+
+    Recommend which columns would be good features for predicting {target_column}. Consider:
+    1. Relevance to the prediction task
+    2. Data quality and completeness
+    3. Avoiding data leakage
+    4. Statistical significance potential
+
+    Return only the JSON object with feature_columns list.
+    """
+                }
+            ]
+
+            response_text = self.client.chat.completions.create(
+                model="gpt-4o",
+                messages=messages,
+                temperature=0.3,
+                max_tokens=1000
+            ).choices[0].message.content.strip()
+            
+            # Better JSON cleaning - handle multiple formats
+            cleaned = response_text
+            
+            # Remove markdown code blocks if present
+            if "```" in cleaned:
+                cleaned = re.sub(r"```(?:json)?\s*", "", cleaned)
+                cleaned = re.sub(r"```\s*", "", cleaned)
+            
+            # Remove any leading/trailing whitespace
+            cleaned = cleaned.strip()
+            
+            # Find JSON object if it's embedded in other text
+            json_match = re.search(r'\{[^{}]*"feature_columns"[^{}]*\}', cleaned, re.DOTALL)
+            if json_match:
+                cleaned = json_match.group(0)
+            
+            logger.info(f"Cleaned JSON for parsing: {cleaned}")
+            
+            try:
+                result = json.loads(cleaned)
+                feature_columns = result.get("feature_columns", [])
+                
+                # Ensure we don't include the target column
+                feature_columns = [col for col in feature_columns if col != target_column and col in available_features]
+                
+                logger.info(f"Successfully parsed feature columns: {feature_columns}")
+                
+                return AIFeatureSelectionResponse(
+                    success=True,
+                    featuresColumns=feature_columns
+                )
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON decode error: {e}")
+                logger.error(f"Failed to parse JSON response: {cleaned}")
+                
+                # Fallback: try to extract column names from the response text
+                fallback_columns = []
+                for col in available_features:
+                    if col in response_text:
+                        fallback_columns.append(col)
+                
+                if fallback_columns:
+                    logger.info(f"Using fallback extraction: {fallback_columns}")
+                    return AIFeatureSelectionResponse(
+                        success=True,
+                        featuresColumns=fallback_columns[:10]  # Limit to 10 columns
+                    )
+                
+                return AIFeatureSelectionResponse(
+                    success=False,
+                    error="Failed to parse AI response"
+                )
+
+        except Exception as e:
+            logger.error(f"Error generating feature columns: {e}")
+            return AIFeatureSelectionResponse(
+                success=False,
+                error=f"Failed to analyze features: {str(e)}"
             )
 
     def detect_problem_type(self, target_column: str, csv_data: List[Dict[str, Any]], context: str) -> AIProblemTypeResponse:

@@ -1,4 +1,3 @@
-// API service for project-related operations with question system
 import { API_BASE_URL } from '../config';
 
 // Existing types
@@ -29,8 +28,8 @@ export interface GetProjectsResponse {
   projects: Project[];
 }
 
-// New question system types
-export type QuestionType = 'text' | 'radio' | 'file' | 'readonly';
+// Updated question system types with multiselect
+export type QuestionType = 'text' | 'radio' | 'file' | 'readonly' | 'multiselect'; // NEW: Added multiselect
 
 export interface Question {
   questionId: string;
@@ -42,6 +41,23 @@ export interface Question {
   isRequired: boolean;
   fileTypes?: string[];
   maxFileSize?: number;
+  // NEW: Additional fields for Task 3
+  missingInfo?: {
+    total_missing: number;
+    total_rows: number;
+    rows_to_drop: number;
+    drop_percentage: number;
+    missing_per_column: Record<string, number>;
+    columns_analyzed: string[];
+  };
+  classDistribution?: {
+    is_balanced: boolean;
+    class_counts: Record<string, number>;
+    class_percentages: Record<string, number>;
+    distribution_text: string;
+    min_percentage: number;
+    total_samples: number;
+  };
 }
 
 export interface Answer {
@@ -53,6 +69,7 @@ export interface Answer {
   answerType: QuestionType;
   textAnswer?: string;
   selectedOption?: string;
+  selectedOptions?: string[]; // NEW: For multiselect
   fileName?: string;
   fileUrl?: string;
   answeredAt: string;
@@ -93,6 +110,7 @@ export interface AnswerSubmissionRequest {
   answerType: QuestionType;
   textAnswer?: string;
   selectedOption?: string;
+  selectedOptions?: string[]; // NEW: For multiselect
   fileName?: string;
   fileUrl?: string;
 }
@@ -245,7 +263,7 @@ export const projectApi = {
     }
   },
 
-  // New question system functions
+  // Question system functions
   getQuestion: async (projectId: string, taskIndex: number, subtaskIndex: number): Promise<QuestionResponse> => {
     try {
       const response = await fetch(`${API_BASE_URL}/projects/${projectId}/questions/${taskIndex}/${subtaskIndex}`, {

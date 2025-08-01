@@ -230,10 +230,10 @@ class DynamoDBService:
     # ========== QUESTION & ANSWER OPERATIONS ==========
     
     def save_question_answer(self, user_email: str, project_id: str, task_index: int, 
-                           subtask_index: int, question_id: str, question_text: str,
-                           question_type: str, user_response: Optional[str] = None,
-                           options: Optional[List[str]] = None, file_url: Optional[str] = None,
-                           file_name: Optional[str] = None) -> Dict:
+                       subtask_index: int, question_id: str, question_text: str,
+                       question_type: str, user_response: Optional[str] = None,
+                       options: Optional[List[str]] = None, file_url: Optional[str] = None,
+                       file_name: Optional[str] = None, selected_options: Optional[List[str]] = None) -> Dict:  # FIXED: Added selected_options parameter
         """Save a question and its answer"""
         try:
             item = {
@@ -248,12 +248,16 @@ class DynamoDBService:
                 'options': options,
                 'fileUrl': file_url,
                 'fileName': file_name,
+                'selectedOptions': selected_options,  # FIXED: Store multiselect options
                 'answeredAt': datetime.utcnow().isoformat(),
                 'itemType': 'QUESTION_ANSWER'
             }
             
             # Remove None values
             item = {k: v for k, v in item.items() if v is not None}
+            
+            # Debug logging
+            logger.info(f"Saving item to DynamoDB: {item}")
             
             self.table.put_item(Item=item)
             

@@ -5,17 +5,24 @@ interface ReadOnlyQuestionProps {
   questionText: string;
   datasetSummary?: any; // For dataset summary display
   onValidityChange: (isValid: boolean) => void;
+  onAnswerChange?: (answer: any) => void; // 🎯 ADD THIS LINE
 }
 
 const ReadOnlyQuestion: React.FC<ReadOnlyQuestionProps> = ({
   questionText,
   datasetSummary,
   onValidityChange,
+  onAnswerChange, // 🎯 ADD THIS LINE
 }) => {
   useEffect(() => {
     // Read-only questions are always valid
     onValidityChange(true);
-  }, [onValidityChange]);
+
+    // 🎯 ADD THESE LINES: Immediately set readonly answer
+    if (onAnswerChange) {
+      onAnswerChange("readonly");
+    }
+  }, []); // 🎯 ADD onAnswerChange to dependency array
 
   const renderDatasetSummary = () => {
     if (!datasetSummary) return null;

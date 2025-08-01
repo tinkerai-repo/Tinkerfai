@@ -48,12 +48,13 @@ class ProjectResponse(BaseModel):
     userEmail: str
     context_for_LLM: str = ""  # New field for AI context
 
-# New question system models
+# Enhanced question system models
 class QuestionType(str, Enum):
     TEXT = "text"
     RADIO = "radio"
     FILE = "file"
     READONLY = "readonly"
+    MULTISELECT = "multiselect"  # NEW: Added for Task 3 Q1
 
 class QuestionRequest(BaseModel):
     userEmail: str
@@ -71,6 +72,9 @@ class QuestionResponse(BaseModel):
     isRequired: bool = True
     fileTypes: Optional[List[str]] = None  # For file uploads (e.g., [".csv"])
     maxFileSize: Optional[int] = None  # In bytes
+    # NEW: Additional fields for Task 3
+    missingInfo: Optional[Dict[str, Any]] = None  # For missing values info
+    classDistribution: Optional[Dict[str, int]] = None  # For class imbalance info
 
 class AnswerSubmissionRequest(BaseModel):
     userEmail: str
@@ -81,6 +85,7 @@ class AnswerSubmissionRequest(BaseModel):
     answerType: QuestionType
     textAnswer: Optional[str] = None
     selectedOption: Optional[str] = None
+    selectedOptions: Optional[List[str]] = None  # NEW: For multiselect
     fileName: Optional[str] = None
     fileUrl: Optional[str] = None
 
@@ -93,11 +98,12 @@ class AnswerResponse(BaseModel):
     answerType: QuestionType
     textAnswer: Optional[str] = None
     selectedOption: Optional[str] = None
+    selectedOptions: Optional[List[str]] = None  # NEW: For multiselect
     fileName: Optional[str] = None
     fileUrl: Optional[str] = None
     answeredAt: str
 
-# File upload models
+# File upload models (unchanged)
 class FileUploadRequest(BaseModel):
     projectId: str
     taskIndex: int
@@ -116,7 +122,7 @@ class FileValidationResponse(BaseModel):
     isValid: bool
     validationDetails: Optional[Dict[str, Any]] = None
 
-# CSV analysis models
+# CSV analysis models (unchanged)
 class DatasetSummaryResponse(BaseModel):
     rowCount: int
     columnCount: int
@@ -151,6 +157,18 @@ class AITargetColumnResponse(BaseModel):
     classificationColumns: List[str] = []
     error: Optional[str] = None
 
+# NEW: AI Feature Selection for Task 3 Q1
+class AIFeatureSelectionRequest(BaseModel):
+    projectId: str
+    csvData: List[Dict[str, Any]]
+    targetColumn: str
+    context: str
+
+class AIFeatureSelectionResponse(BaseModel):
+    success: bool
+    featuresColumns: List[str] = []
+    error: Optional[str] = None
+
 class AIProblemTypeRequest(BaseModel):
     projectId: str
     targetColumn: str
@@ -163,7 +181,7 @@ class AIProblemTypeResponse(BaseModel):
     explanation: Optional[str] = None
     error: Optional[str] = None
 
-# Enhanced response models
+# Enhanced response models (unchanged)
 class GetProjectsResponse(BaseModel):
     success: bool
     message: str
@@ -184,7 +202,7 @@ class ErrorResponse(BaseModel):
     message: str
     error: Optional[str] = None
 
-# Progress tracking models
+# Progress tracking models (unchanged)
 class UserProgressResponse(BaseModel):
     userEmail: str
     projectId: str

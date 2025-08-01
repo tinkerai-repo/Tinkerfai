@@ -14,6 +14,7 @@ from services.question import question_service
 from services.s3 import s3_service
 from dependencies import get_current_user_email
 import logging
+logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
@@ -384,6 +385,7 @@ async def submit_answer(
                 "answerType": request.answerType.value,
                 "textAnswer": request.textAnswer,
                 "selectedOption": request.selectedOption,
+                "selectedOptions": request.selectedOptions,  # NEW: Added for multiselect
                 "fileName": request.fileName,
                 "fileUrl": request.fileUrl
             }
