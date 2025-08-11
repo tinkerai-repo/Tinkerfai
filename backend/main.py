@@ -387,7 +387,10 @@ async def submit_answer(
                 "selectedOption": request.selectedOption,
                 "selectedOptions": request.selectedOptions,  # NEW: Added for multiselect
                 "fileName": request.fileName,
-                "fileUrl": request.fileUrl
+                "fileUrl": request.fileUrl,
+                # NEW: Task 4 fields
+                "sliderValue": request.sliderValue,
+                "hyperparameterValues": request.hyperparameterValues,
             }
         )
         

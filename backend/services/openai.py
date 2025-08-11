@@ -6,7 +6,9 @@ from typing import Dict, List, Any, Optional, Tuple
 from config import settings
 from models import (
     QuestionType, AIQuestionGenerationResponse, AITargetColumnResponse, 
-    AIProblemTypeResponse, AIFeatureSelectionResponse  # NEW: Added
+    AIProblemTypeResponse, AIFeatureSelectionResponse,
+    # NEW: Task 4 imports
+    AIModelSelectionResponse, AIHyperparameterResponse, AICodeGenerationResponse
 )
 import re
 
@@ -17,18 +19,19 @@ class OpenAIService:
         # Initialize OpenAI client with new API
         self.client = openai.OpenAI(api_key=settings.openai_api_key)
         self.model = "gpt-4"
+        self.model_advanced = "gpt-4o"  # For complex tasks like code generation
         self.max_retries = 3
         self.retry_delay = 1.0
 
-    def _make_api_call(self, messages: List[Dict[str, str]], temperature: float = 0.7) -> Optional[str]:
+    def _make_api_call(self, messages: List[Dict[str, str]], temperature: float = 0.7, model: str = None) -> Optional[str]:
         """Make OpenAI API call with retry logic"""
         for attempt in range(self.max_retries):
             try:
                 response = self.client.chat.completions.create(
-                    model=self.model,
+                    model=model or self.model,
                     messages=messages,
                     temperature=temperature,
-                    max_tokens=1000
+                    max_tokens=1000 if model != self.model_advanced else 2000
                 )
                 return response.choices[0].message.content.strip()
             
@@ -119,10 +122,8 @@ Be confident in your assessment and educational in your explanation.
                 else:
                     raise ValueError(f"Unknown subtask index: {subtask_index}")
             
-            # NEW: Task 3 handling
+            # Task 3 questions are handled in question.py with static templates
             elif task_index == 3:
-                # Task 3 questions are handled in question.py with static templates
-                # This is kept for future dynamic generation if needed
                 return AIQuestionGenerationResponse(
                     success=True,
                     question="Task 3 question placeholder",
@@ -426,6 +427,279 @@ Consider the data type, number of unique values, and the nature of the values.
             return AIProblemTypeResponse(
                 success=False,
                 error=f"Failed to detect problem type: {str(e)}"
+            )
+
+    # NEW: Task 4 AI Functions
+
+    def generate_model_options(self, context: str, problem_type: str) -> AIModelSelectionResponse:
+        """Generate suitable ML models based on context and problem type"""
+        try:
+            messages = [
+                {
+                    "role": "system",
+                    "content": """You are a machine learning expert. Based on the given context and problem type, recommend the most suitable ML models.
+
+Return your response in this exact JSON format:
+{
+    "models": ["Model 1", "Model 2", "Model 3", "Model 4", "Model 5", "Model 6"]
+}
+
+Order the models by suitability/preference for the given context. Limit to maximum 6 models.
+Use standard scikit-learn model names exactly as they appear in sklearn documentation."""
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+Based on this context and problem type, recommend suitable ML models:
+
+Context: {context}
+
+Problem Type: {problem_type}
+
+For {problem_type} problems, consider factors like:
+- Dataset size and complexity
+- Interpretability requirements  
+- Performance expectations
+- Computational efficiency
+
+Available {problem_type} models:
+- Classification: Support Vector Machine, Decision Tree Classifier, Random Forest Classifier, Naive Bayes, Logistic Regression, K-Nearest Neighbors, Gradient Boosting Classifier
+- Regression: Linear Regression, Decision Tree Regressor, Random Forest Regressor, Support Vector Regression, Ridge Regression, Lasso Regression, Gradient Boosting Regressor
+
+Return models in order of preference (most suitable first). Maximum 6 models.
+"""
+                }
+            ]
+
+            response_text = self._make_api_call(messages, temperature=0.3)
+            
+            # Clean and parse JSON
+            cleaned = response_text.strip()
+            if "```" in cleaned:
+                cleaned = re.sub(r"```(?:json)?\s*", "", cleaned)
+                cleaned = re.sub(r"```\s*", "", cleaned)
+            
+            try:
+                result = json.loads(cleaned)
+                models = result.get("models", [])
+                
+                # Limit to 6 models
+                models = models[:6]
+                
+                return AIModelSelectionResponse(
+                    success=True,
+                    models=models
+                )
+            except json.JSONDecodeError:
+                logger.error(f"Failed to parse model selection response: {response_text}")
+                return AIModelSelectionResponse(
+                    success=False,
+                    error="Failed to parse AI response"
+                )
+
+        except Exception as e:
+            logger.error(f"Error generating model options: {e}")
+            return AIModelSelectionResponse(
+                success=False,
+                error=f"Failed to generate model options: {str(e)}"
+            )
+
+    def generate_hyperparameters(self, context: str, selected_model: str, problem_type: str) -> AIHyperparameterResponse:
+        """Generate hyperparameter configuration for selected model"""
+        try:
+            messages = [
+                {
+                    "role": "system",
+                    "content": """You are a machine learning expert. For the given model, identify 0-3 most impactful hyperparameters.
+
+Return your response in this exact JSON format:
+{
+    "hyperparameters": [
+        {
+            "name": "parameter_name",
+            "type": "integer|float|select",
+            "min": 1,
+            "max": 100,
+            "default": 10,
+            "options": ["option1", "option2"] (only for select type),
+            "description": "Brief description"
+        }
+    ]
+}
+
+IMPORTANT RULES:
+- For "default": use actual numeric values or strings, never use null/None
+- For integer parameters without a good default, use a reasonable middle value
+- For select parameters, always provide options array and set default to first option
+- name: exact parameter name used in sklearn
+- type: "integer", "float", or "select" (for categorical)
+- min/max: reasonable ranges based on typical use
+- default: recommended starting value (never null/None)
+- description: brief explanation of what it controls
+
+Return 0-3 most impactful hyperparameters only."""
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+Generate hyperparameter configuration for this model:
+
+Model: {selected_model}
+Problem Type: {problem_type}
+Context: {context}
+
+Consider the dataset characteristics and problem complexity when setting ranges and defaults.
+Focus on hyperparameters that have the most impact on model performance.
+
+If the model has no important hyperparameters to tune (like Linear Regression), return an empty hyperparameters array.
+
+For RandomForestClassifier, focus on n_estimators, max_depth, min_samples_split.
+For KNeighborsClassifier, focus on n_neighbors, weights, metric.
+
+Always provide valid default values - never use null or None.
+"""
+                }
+            ]
+
+            response_text = self._make_api_call(messages, temperature=0.3, model=self.model_advanced)
+            
+            # Enhanced JSON cleaning for hyperparameters
+            cleaned = response_text.strip()
+            
+            # Remove markdown code blocks
+            if "```json" in cleaned:
+                cleaned = re.sub(r"```json\s*", "", cleaned)
+                cleaned = re.sub(r"```\s*$", "", cleaned)
+            elif "```" in cleaned:
+                cleaned = re.sub(r"```\s*", "", cleaned)
+            
+            # Fix Python None to JSON null
+            cleaned = cleaned.replace('"default": None', '"default": null')
+            
+            # Find complete JSON object
+            json_match = re.search(r'\{.*?"hyperparameters".*?\]\s*\}', cleaned, re.DOTALL)
+            if json_match:
+                cleaned = json_match.group(0)
+            
+            logger.info(f"Cleaned hyperparameter JSON: {cleaned}")
+            
+            try:
+                result = json.loads(cleaned)
+                hyperparameters = result.get("hyperparameters", [])
+                
+                # Validate and fix hyperparameters structure
+                validated_params = []
+                for param in hyperparameters[:3]:  # Max 3 parameters
+                    if isinstance(param, dict) and all(key in param for key in ["name", "type", "default"]):
+                        # Convert null back to None for Python, but handle properly
+                        if param["default"] is None:
+                            if param["type"] == "select":
+                                continue  # Skip parameters with None default for select type
+                            else:
+                                param["default"] = 10 if param["type"] == "integer" else 1.0  # Fallback defaults
+                        
+                        # Ensure proper types
+                        if param["type"] in ["integer", "float", "select"]:
+                            validated_params.append(param)
+                
+                logger.info(f"Validated hyperparameters: {validated_params}")
+                
+                return AIHyperparameterResponse(
+                    success=True,
+                    hyperparameters=validated_params
+                )
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse hyperparameter JSON: {e}")
+                logger.error(f"Raw response: {response_text}")
+                logger.error(f"Cleaned response: {cleaned}")
+                
+                # Return empty hyperparameters as fallback
+                return AIHyperparameterResponse(
+                    success=True,
+                    hyperparameters=[]
+                )
+
+        except Exception as e:
+            logger.error(f"Error generating hyperparameters: {e}")
+            return AIHyperparameterResponse(
+                success=False,
+                error=f"Failed to generate hyperparameters: {str(e)}"
+            )
+
+    def generate_ml_code(self, context: str, model_type: str, train_test_split: int, 
+                        hyperparameters: Dict[str, Any]) -> AICodeGenerationResponse:
+        """Generate complete ML code using GPT-4o"""
+        try:
+            messages = [
+                {
+                    "role": "system",
+                    "content": """You are a senior data scientist and Python expert. Generate complete, production-ready machine learning code.
+
+The code should:
+1. Import all necessary libraries (pandas, numpy, scikit-learn, etc.)
+2. Load and preprocess the dataset based on user selections
+3. Handle missing values, normalization, encoding as needed
+4. Split data into train/test sets
+5. Train the specified model with given hyperparameters
+6. Include basic model evaluation
+7. Save the trained model for future use
+
+Requirements:
+- Use only standard libraries (pandas, numpy, scikit-learn, joblib)
+- Add clear but concise comments (every 3-4 lines)
+- Structure code in logical sections
+- Handle both numerical and categorical features
+- Include proper error handling
+- Make code educational but not overwhelming
+
+Return only the Python code, no explanations before or after."""
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+Generate ML code based on this context:
+
+Context (includes all user selections): {context}
+
+Model: {model_type}
+Train/Test Split: {train_test_split}% train, {100-train_test_split}% test
+Hyperparameters: {hyperparameters}
+
+The context contains information about:
+- Dataset structure and columns
+- Target column selection
+- Feature columns selection
+- Missing value handling preferences
+- Normalization preferences
+- Problem type (classification/regression)
+
+Generate complete Python code that implements the full ML pipeline from data loading to model saving.
+"""
+                }
+            ]
+
+            response_text = self._make_api_call(messages, temperature=0.3, model=self.model_advanced)
+            
+            # Clean the code response
+            cleaned_code = response_text.strip()
+            
+            # Remove markdown code blocks if present
+            if "```python" in cleaned_code:
+                cleaned_code = re.sub(r"```python\s*", "", cleaned_code)
+                cleaned_code = re.sub(r"```\s*$", "", cleaned_code)
+            elif "```" in cleaned_code:
+                cleaned_code = re.sub(r"```\s*", "", cleaned_code)
+            
+            return AICodeGenerationResponse(
+                success=True,
+                code=cleaned_code.strip()
+            )
+
+        except Exception as e:
+            logger.error(f"Error generating ML code: {e}")
+            return AICodeGenerationResponse(
+                success=False,
+                error=f"Failed to generate code: {str(e)}"
             )
 
     def build_context_string(self, question: str, user_response: Optional[str] = None, 

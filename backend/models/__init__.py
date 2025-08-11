@@ -48,13 +48,15 @@ class ProjectResponse(BaseModel):
     userEmail: str
     context_for_LLM: str = ""  # New field for AI context
 
-# Enhanced question system models
+# Enhanced question system models - UPDATED with Task 4 question types
 class QuestionType(str, Enum):
     TEXT = "text"
     RADIO = "radio"
     FILE = "file"
     READONLY = "readonly"
-    MULTISELECT = "multiselect"  # NEW: Added for Task 3 Q1
+    MULTISELECT = "multiselect"
+    SLIDER = "slider"  # NEW: For train-test split
+    HYPERPARAMETER = "hyperparameter"  # NEW: For hyperparameter configuration
 
 class QuestionRequest(BaseModel):
     userEmail: str
@@ -72,9 +74,13 @@ class QuestionResponse(BaseModel):
     isRequired: bool = True
     fileTypes: Optional[List[str]] = None  # For file uploads (e.g., [".csv"])
     maxFileSize: Optional[int] = None  # In bytes
-    # NEW: Additional fields for Task 3
+    # Task 3 fields
     missingInfo: Optional[Dict[str, Any]] = None  # For missing values info
     classDistribution: Optional[Dict[str, int]] = None  # For class imbalance info
+    # NEW: Task 4 fields
+    sliderConfig: Optional[Dict[str, Any]] = None  # For slider configuration
+    hyperparameters: Optional[List[Dict[str, Any]]] = None  # For hyperparameter configs
+    generatedCode: Optional[str] = None  # For code generation display
 
 class AnswerSubmissionRequest(BaseModel):
     userEmail: str
@@ -85,9 +91,12 @@ class AnswerSubmissionRequest(BaseModel):
     answerType: QuestionType
     textAnswer: Optional[str] = None
     selectedOption: Optional[str] = None
-    selectedOptions: Optional[List[str]] = None  # NEW: For multiselect
+    selectedOptions: Optional[List[str]] = None  # For multiselect
     fileName: Optional[str] = None
     fileUrl: Optional[str] = None
+    # NEW: Task 4 answer fields
+    sliderValue: Optional[int] = None  # For slider (train percentage)
+    hyperparameterValues: Optional[Dict[str, Any]] = None  # For hyperparameters
 
 class AnswerResponse(BaseModel):
     userEmail: str
@@ -98,10 +107,13 @@ class AnswerResponse(BaseModel):
     answerType: QuestionType
     textAnswer: Optional[str] = None
     selectedOption: Optional[str] = None
-    selectedOptions: Optional[List[str]] = None  # NEW: For multiselect
+    selectedOptions: Optional[List[str]] = None  # For multiselect
     fileName: Optional[str] = None
     fileUrl: Optional[str] = None
     answeredAt: str
+    # NEW: Task 4 answer fields
+    sliderValue: Optional[int] = None  # For slider (train percentage)
+    hyperparameterValues: Optional[Dict[str, Any]] = None  # For hyperparameters
 
 # File upload models (unchanged)
 class FileUploadRequest(BaseModel):
@@ -157,7 +169,7 @@ class AITargetColumnResponse(BaseModel):
     classificationColumns: List[str] = []
     error: Optional[str] = None
 
-# NEW: AI Feature Selection for Task 3 Q1
+# AI Feature Selection for Task 3
 class AIFeatureSelectionRequest(BaseModel):
     projectId: str
     csvData: List[Dict[str, Any]]
@@ -179,6 +191,40 @@ class AIProblemTypeResponse(BaseModel):
     success: bool
     problemType: Optional[str] = None  # "regression" or "classification"
     explanation: Optional[str] = None
+    error: Optional[str] = None
+
+# NEW: Task 4 AI Models
+class AIModelSelectionRequest(BaseModel):
+    projectId: str
+    context: str
+    problemType: str  # "regression" or "classification"
+
+class AIModelSelectionResponse(BaseModel):
+    success: bool
+    models: List[str] = []  # Ordered list of suitable models
+    error: Optional[str] = None
+
+class AIHyperparameterRequest(BaseModel):
+    projectId: str
+    context: str
+    selectedModel: str
+    problemType: str
+
+class AIHyperparameterResponse(BaseModel):
+    success: bool
+    hyperparameters: List[Dict[str, Any]] = []  # List of hyperparameter configs
+    error: Optional[str] = None
+
+class AICodeGenerationRequest(BaseModel):
+    projectId: str
+    context: str
+    modelType: str
+    trainTestSplit: int  # train percentage
+    hyperparameters: Dict[str, Any]
+
+class AICodeGenerationResponse(BaseModel):
+    success: bool
+    code: Optional[str] = None
     error: Optional[str] = None
 
 # Enhanced response models (unchanged)

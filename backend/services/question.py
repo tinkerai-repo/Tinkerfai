@@ -44,7 +44,11 @@ class QuestionService:
                         questionType=QuestionType(answer_data.get("questionType", "text")),
                         questionText=answer_data.get("questionText", ""),
                         options=answer_data.get("options"),
-                        isRequired=True
+                        isRequired=True,
+                        # Task 4 fields
+                        sliderConfig=answer_data.get("sliderConfig"),
+                        hyperparameters=answer_data.get("hyperparameters"),
+                        generatedCode=answer_data.get("generatedCode")
                     ),
                     "existingAnswer": AnswerResponse(
                         userEmail=user_email,
@@ -55,10 +59,13 @@ class QuestionService:
                         answerType=QuestionType(answer_data.get("questionType", "text")),
                         textAnswer=answer_data.get("userResponse"),
                         selectedOption=answer_data.get("userResponse") if answer_data.get("questionType") == "radio" else None,
-                        selectedOptions=answer_data.get("selectedOptions") if answer_data.get("questionType") == "multiselect" else None,  # NEW
+                        selectedOptions=answer_data.get("selectedOptions") if answer_data.get("questionType") == "multiselect" else None,
                         fileName=answer_data.get("fileName"),
                         fileUrl=answer_data.get("fileUrl"),
-                        answeredAt=answer_data.get("answeredAt", "")
+                        answeredAt=answer_data.get("answeredAt", ""),
+                        # Task 4 fields
+                        sliderValue=answer_data.get("sliderValue"),
+                        hyperparameterValues=answer_data.get("hyperparameterValues")
                     )
                 }
 
@@ -109,112 +116,14 @@ class QuestionService:
                 }
 
             elif task_index == 2:
-                if subtask_index == 0:
-                    # Task 2, Subtask 1: CSV Upload
-                    ai_response = self.ai.generate_dynamic_question(
-                        context, project_name, project_type, task_index, subtask_index + 1
-                    )
-                    
-                    if not ai_response.success:
-                        return {"success": False, "message": ai_response.error}
+                return self._generate_task2_question(user_email, project_id, subtask_index, question_id, context, project_name, project_type)
 
-                    return {
-                        "success": True,
-                        "question": QuestionResponse(
-                            questionId=question_id,
-                            taskIndex=task_index,
-                            subtaskIndex=subtask_index,
-                            questionType=QuestionType.FILE,
-                            questionText=ai_response.question,
-                            fileTypes=[".csv"],
-                            maxFileSize=5 * 1024 * 1024,  # 5MB
-                            isRequired=True
-                        )
-                    }
-
-                elif subtask_index == 1:
-                    # Task 2, Subtask 2: Dataset summary
-                    csv_answer = self.db.get_specific_answer(user_email, project_id, task_index, 0)
-                    file_key = csv_answer["answer"].get("fileUrl", "")
-                    summary = self.s3.get_dataset_summary(file_key)
-                    if not summary:
-                        return {"success": False, "message": "Failed to generate dataset summary"}
-                    
-                    return {
-                        "success": True,
-                        "question": QuestionResponse(
-                            questionId=question_id,
-                            taskIndex=task_index,
-                            subtaskIndex=subtask_index,
-                            questionType=QuestionType.READONLY,
-                            questionText="Review your dataset summary below. Click submit when you're ready to proceed to the next step.",
-                            isRequired=False
-                        ),
-                        "datasetSummary": summary
-                    }
-
-                elif subtask_index == 2:
-                    # Task 2, Subtask 3: Target column selection
-                    # Need CSV data from previous step
-                    csv_answer = self.db.get_specific_answer(user_email, project_id, task_index, 0)
-                    file_key = csv_answer["answer"].get("fileUrl", "")
-                    if not file_key:
-                        return {"success": False, "message": "CSV file not found"}
-                    # Get CSV data and generate target columns (file_key is already the S3 key)
-                    is_valid, message, csv_data = self.s3.validate_and_process_csv(file_key)
-                    if not is_valid:
-                        return {"success": False, "message": message}
-                    ai_response = self.ai.generate_target_columns(csv_data, context)
-                    if not ai_response.success:
-                        return {"success": False, "message": ai_response.error}
-                    # Combine regression and classification columns
-                    all_columns = ai_response.regressionColumns + ai_response.classificationColumns
-                    if not all_columns:
-                        return {"success": False, "message": "No suitable target columns found in the dataset"}
-                    return {
-                        "success": True,
-                        "question": QuestionResponse(
-                            questionId=question_id,
-                            taskIndex=task_index,
-                            subtaskIndex=subtask_index,
-                            questionType=QuestionType.RADIO,
-                            questionText="Choose the column you want to predict:",
-                            options=all_columns,
-                            isRequired=True
-                        )
-                    }
-
-                elif subtask_index == 3:
-                    # Task 2, Subtask 4: Problem type confirmation
-                    # Get target column from previous step
-                    target_answer = self.db.get_specific_answer(user_email, project_id, task_index, subtask_index - 1)
-                    if not target_answer["success"]:
-                        return {"success": False, "message": "Target column selection required"}
-                    target_column = target_answer["answer"].get("userResponse", "")
-                    # Get CSV data
-                    csv_answer = self.db.get_specific_answer(user_email, project_id, task_index, 0)
-                    file_key = csv_answer["answer"].get("fileUrl", "")
-                    _, _, csv_data = self.s3.validate_and_process_csv(file_key)
-                    # Detect problem type
-                    ai_response = self.ai.detect_problem_type(target_column, csv_data, context)
-                    if not ai_response.success:
-                        return {"success": False, "message": ai_response.error}
-                    confirmation_text = f"Confirm problem type: This is a {ai_response.problemType} problem. {ai_response.explanation} Click submit to proceed to the next step."
-                    return {
-                        "success": True,
-                        "question": QuestionResponse(
-                            questionId=question_id,
-                            taskIndex=task_index,
-                            subtaskIndex=subtask_index,
-                            questionType=QuestionType.READONLY,
-                            questionText=confirmation_text,
-                            isRequired=False
-                        )
-                    }
-
-            # NEW: Task 3 handling
             elif task_index == 3:
                 return self._generate_task3_question(user_email, project_id, subtask_index, question_id, context)
+
+            # NEW: Task 4 handling
+            elif task_index == 4:
+                return self._generate_task4_question(user_email, project_id, subtask_index, question_id, context)
 
             return {"success": False, "message": "Invalid task/subtask combination"}
 
@@ -225,26 +134,131 @@ class QuestionService:
                 "message": f"Failed to generate question: {str(e)}"
             }
 
+    def _generate_task2_question(self, user_email: str, project_id: str, subtask_index: int, question_id: str, context: str, project_name: str, project_type: str) -> Dict:
+        """Generate Task 2 questions (Data Upload & Analysis)"""
+        if subtask_index == 0:
+            # Task 2, Subtask 1: CSV Upload
+            ai_response = self.ai.generate_dynamic_question(
+                context, project_name, project_type, 2, subtask_index + 1
+            )
+            
+            if not ai_response.success:
+                return {"success": False, "message": ai_response.error}
+
+            return {
+                "success": True,
+                "question": QuestionResponse(
+                    questionId=question_id,
+                    taskIndex=2,
+                    subtaskIndex=subtask_index,
+                    questionType=QuestionType.FILE,
+                    questionText=ai_response.question,
+                    fileTypes=[".csv"],
+                    maxFileSize=5 * 1024 * 1024,  # 5MB
+                    isRequired=True
+                )
+            }
+
+        elif subtask_index == 1:
+            # Task 2, Subtask 2: Dataset summary
+            csv_answer = self.db.get_specific_answer(user_email, project_id, 2, 0)
+            file_key = csv_answer["answer"].get("fileUrl", "")
+            summary = self.s3.get_dataset_summary(file_key)
+            if not summary:
+                return {"success": False, "message": "Failed to generate dataset summary"}
+            
+            return {
+                "success": True,
+                "question": QuestionResponse(
+                    questionId=question_id,
+                    taskIndex=2,
+                    subtaskIndex=subtask_index,
+                    questionType=QuestionType.READONLY,
+                    questionText="Review your dataset summary below. Click submit when you're ready to proceed to the next step.",
+                    isRequired=False
+                ),
+                "datasetSummary": summary
+            }
+
+        elif subtask_index == 2:
+            # Task 2, Subtask 3: Target column selection
+            csv_answer = self.db.get_specific_answer(user_email, project_id, 2, 0)
+            file_key = csv_answer["answer"].get("fileUrl", "")
+            if not file_key:
+                return {"success": False, "message": "CSV file not found"}
+            
+            is_valid, message, csv_data = self.s3.validate_and_process_csv(file_key)
+            if not is_valid:
+                return {"success": False, "message": message}
+            
+            ai_response = self.ai.generate_target_columns(csv_data, context)
+            if not ai_response.success:
+                return {"success": False, "message": ai_response.error}
+            
+            all_columns = ai_response.regressionColumns + ai_response.classificationColumns
+            if not all_columns:
+                return {"success": False, "message": "No suitable target columns found in the dataset"}
+            
+            return {
+                "success": True,
+                "question": QuestionResponse(
+                    questionId=question_id,
+                    taskIndex=2,
+                    subtaskIndex=subtask_index,
+                    questionType=QuestionType.RADIO,
+                    questionText="Choose the column you want to predict:",
+                    options=all_columns,
+                    isRequired=True
+                )
+            }
+
+        elif subtask_index == 3:
+            # Task 2, Subtask 4: Problem type confirmation
+            target_answer = self.db.get_specific_answer(user_email, project_id, 2, subtask_index - 1)
+            if not target_answer["success"]:
+                return {"success": False, "message": "Target column selection required"}
+            
+            target_column = target_answer["answer"].get("userResponse", "")
+            csv_answer = self.db.get_specific_answer(user_email, project_id, 2, 0)
+            file_key = csv_answer["answer"].get("fileUrl", "")
+            _, _, csv_data = self.s3.validate_and_process_csv(file_key)
+            
+            ai_response = self.ai.detect_problem_type(target_column, csv_data, context)
+            if not ai_response.success:
+                return {"success": False, "message": ai_response.error}
+            
+            confirmation_text = f"Confirm problem type: This is a {ai_response.problemType} problem. {ai_response.explanation} Click submit to proceed to the next step."
+            
+            return {
+                "success": True,
+                "question": QuestionResponse(
+                    questionId=question_id,
+                    taskIndex=2,
+                    subtaskIndex=subtask_index,
+                    questionType=QuestionType.READONLY,
+                    questionText=confirmation_text,
+                    isRequired=False
+                )
+            }
+
+        return {"success": False, "message": f"Unknown Task 2 subtask: {subtask_index}"}
+
     def _generate_task3_question(self, user_email: str, project_id: str, subtask_index: int, question_id: str, context: str) -> Dict:
         """Generate Task 3 questions (Feature Engineering)"""
         try:
             if subtask_index == 0:
                 # Q1: Feature Selection (Multi-select)
-                # Get target column from Task 2
                 target_answer = self.db.get_specific_answer(user_email, project_id, 2, 2)
                 if not target_answer["success"]:
                     return {"success": False, "message": "Target column selection required from Task 2"}
                 
                 target_column = target_answer["answer"].get("userResponse", "")
-                
-                # Get CSV data
                 csv_answer = self.db.get_specific_answer(user_email, project_id, 2, 0)
                 file_key = csv_answer["answer"].get("fileUrl", "")
                 is_valid, message, csv_data = self.s3.validate_and_process_csv(file_key)
                 if not is_valid:
                     return {"success": False, "message": message}
                 
-                # Generate feature columns using AI
                 ai_response = self.ai.generate_feature_columns(csv_data, target_column, context)
                 if not ai_response.success:
                     return {"success": False, "message": ai_response.error}
@@ -267,20 +281,17 @@ class QuestionService:
 
             elif subtask_index == 1:
                 # Q2: Missing Values Handling
-                # Get target and prediction columns
                 target_answer = self.db.get_specific_answer(user_email, project_id, 2, 2)
                 target_column = target_answer["answer"].get("userResponse", "")
                 
                 prediction_answer = self.db.get_specific_answer(user_email, project_id, 3, 0)
                 prediction_columns = prediction_answer["answer"].get("selectedOptions", [])
                 
-                # Get CSV data and calculate missing values
                 csv_answer = self.db.get_specific_answer(user_email, project_id, 2, 0)
                 file_key = csv_answer["answer"].get("fileUrl", "")
                 missing_info = self._calculate_missing_values_impact(file_key, target_column, prediction_columns)
                 
                 if missing_info["total_missing"] == 0:
-                    # No missing values - readonly question
                     return {
                         "success": True,
                         "question": QuestionResponse(
@@ -293,7 +304,6 @@ class QuestionService:
                         )
                     }
                 else:
-                    # Has missing values - show options
                     drop_option = f"Drop rows with missing values ({missing_info['rows_to_drop']} of {missing_info['total_rows']}, which is {missing_info['drop_percentage']:.1f}% of the dataset)"
                     
                     return {
@@ -333,15 +343,12 @@ class QuestionService:
                 }
 
             elif subtask_index == 3:
-                # Q4: Handle Imbalanced Classes (only for classification)
-                # Get problem type from Task 2
+                # Q4: Handle Imbalanced Classes
                 problem_type_answer = self.db.get_specific_answer(user_email, project_id, 2, 3)
                 if problem_type_answer["success"]:
-                    # Extract problem type from the readonly response
                     problem_text = problem_type_answer["answer"].get("questionText", "")
                     is_classification = "classification" in problem_text.lower()
                 else:
-                    # Fallback: detect from target column
                     target_answer = self.db.get_specific_answer(user_email, project_id, 2, 2)
                     target_column = target_answer["answer"].get("userResponse", "")
                     csv_answer = self.db.get_specific_answer(user_email, project_id, 2, 0)
@@ -351,7 +358,6 @@ class QuestionService:
                     is_classification = ai_response.problemType == "classification"
                 
                 if not is_classification:
-                    # Regression - readonly
                     return {
                         "success": True,
                         "question": QuestionResponse(
@@ -364,7 +370,6 @@ class QuestionService:
                         )
                     }
                 else:
-                    # Classification - check for imbalance
                     target_answer = self.db.get_specific_answer(user_email, project_id, 2, 2)
                     target_column = target_answer["answer"].get("userResponse", "")
                     csv_answer = self.db.get_specific_answer(user_email, project_id, 2, 0)
@@ -408,6 +413,180 @@ class QuestionService:
             return {
                 "success": False,
                 "message": f"Failed to generate Task 3 question: {str(e)}"
+            }
+
+    def _generate_task4_question(self, user_email: str, project_id: str, subtask_index: int, question_id: str, context: str) -> Dict:
+        """Generate Task 4 questions (Develop Model)"""
+        try:
+            if subtask_index == 0:
+                # Q1: Train-Test Split (Slider)
+                return {
+                    "success": True,
+                    "question": QuestionResponse(
+                        questionId=question_id,
+                        taskIndex=4,
+                        subtaskIndex=subtask_index,
+                        questionType=QuestionType.SLIDER,
+                        questionText="Choose the train-test split ratio for your model:",
+                        isRequired=True,
+                        sliderConfig={
+                            "min": 60,
+                            "max": 90,
+                            "default": 80,
+                            "step": 5,
+                            "leftLabel": "Train",
+                            "rightLabel": "Test"
+                        }
+                    )
+                }
+
+            elif subtask_index == 1:
+                # Q2: Model Selection (Dynamic from AI)
+                # Get problem type from Task 2
+                problem_type_answer = self.db.get_specific_answer(user_email, project_id, 2, 3)
+                if not problem_type_answer["success"]:
+                    return {"success": False, "message": "Problem type determination required from Task 2"}
+                
+                # Extract problem type from readonly question text
+                problem_text = problem_type_answer["answer"].get("questionText", "")
+                if "classification" in problem_text.lower():
+                    problem_type = "classification"
+                elif "regression" in problem_text.lower():
+                    problem_type = "regression"
+                else:
+                    return {"success": False, "message": "Could not determine problem type"}
+                
+                # Generate model options using AI
+                ai_response = self.ai.generate_model_options(context, problem_type)
+                if not ai_response.success:
+                    return {"success": False, "message": ai_response.error}
+                
+                if not ai_response.models:
+                    return {"success": False, "message": "No suitable models found"}
+                
+                return {
+                    "success": True,
+                    "question": QuestionResponse(
+                        questionId=question_id,
+                        taskIndex=4,
+                        subtaskIndex=subtask_index,
+                        questionType=QuestionType.RADIO,
+                        questionText="Select the machine learning model you want to use:",
+                        options=ai_response.models,
+                        isRequired=True
+                    )
+                }
+
+            elif subtask_index == 2:
+                # Q3: Hyperparameters
+                # Get selected model from previous step
+                model_answer = self.db.get_specific_answer(user_email, project_id, 4, 1)
+                if not model_answer["success"]:
+                    return {"success": False, "message": "Model selection required"}
+                
+                selected_model = model_answer["answer"].get("userResponse", "")
+                
+                # Get problem type
+                problem_type_answer = self.db.get_specific_answer(user_email, project_id, 2, 3)
+                problem_text = problem_type_answer["answer"].get("questionText", "")
+                problem_type = "classification" if "classification" in problem_text.lower() else "regression"
+                
+                # ONLY generate hyperparameters if we don't have them stored yet
+                # Check if we already have this question answered
+                existing_hp_answer = self.db.get_specific_answer(user_email, project_id, 4, 2)
+                if existing_hp_answer["success"]:
+                    # Question already exists, extract the stored hyperparameters
+                    stored_question = existing_hp_answer["answer"]
+                    
+                    # Check if it has hyperparameters stored as question metadata
+                    # Since we don't store question metadata in DB, we need to regenerate
+                    # But only log that we're using cached question
+                    logger.info(f"Reusing existing hyperparameter question for {selected_model}")
+                
+                # Generate hyperparameters using AI (only once per model)
+                logger.info(f"Generating hyperparameters for {selected_model}")
+                ai_response = self.ai.generate_hyperparameters(context, selected_model, problem_type)
+                if not ai_response.success:
+                    logger.warning(f"Hyperparameter generation failed: {ai_response.error}")
+                    return {
+                        "success": True,
+                        "question": QuestionResponse(
+                            questionId=question_id,
+                            taskIndex=4,
+                            subtaskIndex=subtask_index,
+                            questionType=QuestionType.READONLY,
+                            questionText=f"The {selected_model} model will use default parameters. Click submit to proceed.",
+                            isRequired=False
+                        )
+                    }
+                
+                if not ai_response.hyperparameters or len(ai_response.hyperparameters) == 0:
+                    # No hyperparameters to tune
+                    return {
+                        "success": True,
+                        "question": QuestionResponse(
+                            questionId=question_id,
+                            taskIndex=4,
+                            subtaskIndex=subtask_index,
+                            questionType=QuestionType.READONLY,
+                            questionText=f"The {selected_model} model doesn't require hyperparameter tuning. Default parameters will be used. Click submit to proceed.",
+                            isRequired=False
+                        )
+                    }
+                else:
+                    # Has hyperparameters to configure
+                    return {
+                        "success": True,
+                        "question": QuestionResponse(
+                            questionId=question_id,
+                            taskIndex=4,
+                            subtaskIndex=subtask_index,
+                            questionType=QuestionType.HYPERPARAMETER,
+                            questionText=f"Configure hyperparameters for {selected_model}:",
+                            isRequired=True,
+                            hyperparameters=ai_response.hyperparameters
+                        )
+                    }
+
+            elif subtask_index == 3:
+                # Q4: Generate and Display Code
+                # Collect all previous answers
+                train_split_answer = self.db.get_specific_answer(user_email, project_id, 4, 0)
+                model_answer = self.db.get_specific_answer(user_email, project_id, 4, 1)
+                hyperparams_answer = self.db.get_specific_answer(user_email, project_id, 4, 2)
+                
+                if not all([train_split_answer["success"], model_answer["success"], hyperparams_answer["success"]]):
+                    return {"success": False, "message": "Previous Task 4 answers required"}
+                
+                train_percentage = train_split_answer["answer"].get("sliderValue", 80)
+                selected_model = model_answer["answer"].get("userResponse", "")
+                hyperparams = hyperparams_answer["answer"].get("hyperparameterValues", {})
+                
+                # Generate ML code using AI
+                ai_response = self.ai.generate_ml_code(context, selected_model, train_percentage, hyperparams)
+                if not ai_response.success:
+                    return {"success": False, "message": ai_response.error}
+                
+                return {
+                    "success": True,
+                    "question": QuestionResponse(
+                        questionId=question_id,
+                        taskIndex=4,
+                        subtaskIndex=subtask_index,
+                        questionType=QuestionType.READONLY,
+                        questionText="Here's your complete machine learning code based on your selections. Review the code and click submit to proceed.",
+                        isRequired=False,
+                        generatedCode=ai_response.code
+                    )
+                }
+
+            return {"success": False, "message": f"Unknown Task 4 subtask: {subtask_index}"}
+
+        except Exception as e:
+            logger.error(f"Error generating Task 4 question: {e}")
+            return {
+                "success": False,
+                "message": f"Failed to generate Task 4 question: {str(e)}"
             }
 
     def _calculate_missing_values_impact(self, file_key: str, target_column: str, prediction_columns: List[str]) -> Dict[str, Any]:
@@ -575,6 +754,8 @@ class QuestionService:
             file_url = None
             file_name = None
             selected_options = None
+            slider_value = None  # NEW: Task 4
+            hyperparameter_values = None  # NEW: Task 4
 
             logger.info(f"Processing answer_type: {answer_type}")
 
@@ -586,12 +767,10 @@ class QuestionService:
                 selected_options = answer_data.get("selectedOptions", [])
                 user_response = ", ".join(selected_options) if selected_options else ""
                 
-                # ENHANCED DEBUG FOR MULTISELECT
                 logger.info(f"MULTISELECT PROCESSING:")
                 logger.info(f"  - Raw selectedOptions from answer_data: {answer_data.get('selectedOptions')}")
                 logger.info(f"  - Processed selected_options: {selected_options}")
                 logger.info(f"  - Generated user_response: {user_response}")
-                logger.info(f"  - Type of selected_options: {type(selected_options)}")
                 
             elif answer_type == "file":
                 file_url = answer_data.get("fileUrl", "")
@@ -599,27 +778,79 @@ class QuestionService:
                 user_response = f"Uploaded file: {file_name}"
             elif answer_type == "readonly":
                 user_response = "User clicked Proceed"
+            # NEW: Task 4 answer types
+            elif answer_type == "slider":
+                slider_value = answer_data.get("sliderValue")  # This is the correct field name
+                logger.info(f"SLIDER DEBUG: Raw slider_value = {slider_value}, type = {type(slider_value)}")
+                logger.info(f"SLIDER DEBUG: Full answer_data = {answer_data}")
+                
+                if slider_value is not None:
+                    try:
+                        slider_value = int(slider_value)  # Ensure it's an integer
+                        test_value = 100 - slider_value
+                        user_response = f"Train: {slider_value}%, Test: {test_value}%"
+                        logger.info(f"SLIDER SUCCESS: slider_value = {slider_value}, test_value = {test_value}")
+                    except (ValueError, TypeError) as e:
+                        logger.error(f"SLIDER ERROR: Could not convert slider_value to int: {e}")
+                        user_response = f"Invalid slider value: {slider_value}"
+                        slider_value = None
+                else:
+                    logger.error("SLIDER ERROR: slider_value is None or missing from answer_data")
+                    user_response = "Slider value not provided"
+                    slider_value = None
+            elif answer_type == "hyperparameter":
+                hyperparameter_values = answer_data.get("hyperparameterValues", {})  # This is the correct field name
+                logger.info(f"HYPERPARAMETER DEBUG: Raw hyperparameter_values = {hyperparameter_values}")
+                logger.info(f"HYPERPARAMETER DEBUG: Full answer_data = {answer_data}")
+                
+                if hyperparameter_values:
+                    param_strings = [f"{k}: {v}" for k, v in hyperparameter_values.items()]
+                    user_response = f"Hyperparameters - {', '.join(param_strings)}"
+                else:
+                    user_response = "No hyperparameters configured"
 
             # DEBUG BEFORE DATABASE CALL
             logger.info(f"BEFORE DATABASE SAVE:")
             logger.info(f"  - user_response: {user_response}")
             logger.info(f"  - selected_options: {selected_options}")
+            logger.info(f"  - slider_value: {slider_value}")
+            logger.info(f"  - hyperparameter_values: {hyperparameter_values}")
             logger.info(f"  - question_type: {answer_type}")
 
-            # Save question and answer
-            save_result = self.db.save_question_answer(
-                user_email=user_email,
-                project_id=project_id,
-                task_index=task_index,
-                subtask_index=subtask_index,
-                question_id=question_id,
-                question_text=question_text,
-                question_type=answer_type,
-                user_response=user_response,
-                selected_options=selected_options,  # This should have the values
-                file_url=file_url,
-                file_name=file_name
-            )
+            # Save question and answer with Task 4 fields
+            try:
+                # Try with Task 4 fields first
+                save_result = self.db.save_question_answer(
+                    user_email=user_email,
+                    project_id=project_id,
+                    task_index=task_index,
+                    subtask_index=subtask_index,
+                    question_id=question_id,
+                    question_text=question_text,
+                    question_type=answer_type,
+                    user_response=user_response,
+                    selected_options=selected_options,
+                    file_url=file_url,
+                    file_name=file_name,
+                    slider_value=slider_value,  # NEW: Task 4
+                    hyperparameter_values=hyperparameter_values  # NEW: Task 4
+                )
+            except TypeError as e:
+                logger.warning(f"New DynamoDB method signature not available, falling back to old method: {e}")
+                # Fallback to old method signature
+                save_result = self.db.save_question_answer(
+                    user_email=user_email,
+                    project_id=project_id,
+                    task_index=task_index,
+                    subtask_index=subtask_index,
+                    question_id=question_id,
+                    question_text=question_text,
+                    question_type=answer_type,
+                    user_response=user_response,
+                    selected_options=selected_options,
+                    file_url=file_url,
+                    file_name=file_name
+                )
 
             logger.info(f"DATABASE SAVE RESULT: {save_result}")
 
@@ -646,6 +877,12 @@ class QuestionService:
                     context_addition = f"\n\nDATASET_SUMMARY_JSON: {json.dumps(summary_for_llm)}\n\n"
                 else:
                     context_addition = ""
+            # Special handling for Task 4 slider to ensure split is recorded properly
+            elif task_index == 4 and subtask_index == 0 and answer_type == "slider":
+                if slider_value is not None:
+                    context_addition = f"\n\nTRAIN_TEST_SPLIT: Train {slider_value}%, Test {100-slider_value}%\n\n"
+                else:
+                    context_addition = f"\n\nTRAIN_TEST_SPLIT: Default 80% Train, 20% Test\n\n"
             else:
                 # For readonly questions, use "User clicked Proceed"
                 display_response = "User clicked Proceed" if answer_type == "readonly" else user_response

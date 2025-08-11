@@ -3,7 +3,11 @@ import TextQuestion from "./QuestionComponents/TextQuestion";
 import RadioQuestion from "./QuestionComponents/RadioQuestion";
 import FileQuestion from "./QuestionComponents/FileQuestion";
 import ReadOnlyQuestion from "./QuestionComponents/ReadOnlyQuestion";
-import MultiSelectQuestion from "./QuestionComponents/MultiSelectQuestion"; // NEW
+import MultiSelectQuestion from "./QuestionComponents/MultiSelectQuestion";
+// NEW: Task 4 imports
+import SliderQuestion from "./QuestionComponents/SliderQuestion";
+import HyperparameterQuestion from "./QuestionComponents/HyperparameterQuestion";
+import CodeDisplayQuestion from "./QuestionComponents/CodeDisplayQuestion";
 import { Question, Answer, QuestionType } from "../services/projectApi";
 
 interface QuestionRendererProps {
@@ -43,7 +47,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
             selectedOption: existingAnswer.selectedOption || "",
           };
           break;
-        case "multiselect": // NEW: Handle multiselect
+        case "multiselect":
           initialAnswer = {
             answerType: "multiselect",
             selectedOptions: existingAnswer.selectedOptions || [],
@@ -59,6 +63,22 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         case "readonly":
           initialAnswer = {
             answerType: "readonly",
+          };
+          break;
+        // NEW: Task 4 answer types
+        case "slider":
+          initialAnswer = {
+            answerType: "slider",
+            sliderValue:
+              existingAnswer.sliderValue ||
+              question.sliderConfig?.default ||
+              80,
+          };
+          break;
+        case "hyperparameter":
+          initialAnswer = {
+            answerType: "hyperparameter",
+            hyperparameterValues: existingAnswer.hyperparameterValues || {},
           };
           break;
       }
@@ -84,7 +104,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           selectedOption: answer,
         };
         break;
-      case "multiselect": // NEW: Handle multiselect
+      case "multiselect":
         formattedAnswer = {
           answerType: "multiselect",
           selectedOptions: answer,
@@ -102,8 +122,22 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           answerType: "readonly",
         };
         break;
+      // NEW: Task 4 answer types
+      case "slider":
+        formattedAnswer = {
+          answerType: "slider",
+          sliderValue: answer, // This is the key fix
+        };
+        break;
+      case "hyperparameter":
+        formattedAnswer = {
+          answerType: "hyperparameter",
+          hyperparameterValues: answer, // This is the key fix
+        };
+        break;
     }
 
+    console.log("QuestionRenderer formatted answer:", formattedAnswer); // Debug log
     setCurrentAnswer(formattedAnswer);
     onAnswerChange(formattedAnswer);
   };
@@ -133,7 +167,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           />
         );
 
-      case "multiselect": // NEW: Handle multiselect
+      case "multiselect":
         return (
           <MultiSelectQuestion
             questionText={question.questionText}
@@ -169,12 +203,69 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         );
 
       case "readonly":
+        // Check if this is a code display readonly question
+        if (question.generatedCode) {
+          return (
+            <CodeDisplayQuestion
+              questionText={question.questionText}
+              generatedCode={question.generatedCode}
+              onValidityChange={onValidityChange}
+              onAnswerChange={handleAnswerChange}
+            />
+          );
+        }
+
+        // Regular readonly question
         return (
           <ReadOnlyQuestion
             questionText={question.questionText}
             datasetSummary={datasetSummary}
             onValidityChange={onValidityChange}
             onAnswerChange={handleAnswerChange}
+          />
+        );
+
+      // NEW: Task 4 question types
+      case "slider":
+        if (!question.sliderConfig) {
+          return (
+            <div className="error-state">
+              <p>Slider configuration missing</p>
+            </div>
+          );
+        }
+
+        return (
+          <SliderQuestion
+            questionText={question.questionText}
+            sliderConfig={question.sliderConfig}
+            initialValue={existingAnswer?.sliderValue}
+            isRequired={question.isRequired}
+            onAnswerChange={handleAnswerChange}
+            onValidityChange={onValidityChange}
+          />
+        );
+
+      case "hyperparameter":
+        if (
+          !question.hyperparameters ||
+          question.hyperparameters.length === 0
+        ) {
+          return (
+            <div className="error-state">
+              <p>Hyperparameter configuration missing</p>
+            </div>
+          );
+        }
+
+        return (
+          <HyperparameterQuestion
+            questionText={question.questionText}
+            hyperparameters={question.hyperparameters}
+            initialValue={existingAnswer?.hyperparameterValues}
+            isRequired={question.isRequired}
+            onAnswerChange={handleAnswerChange}
+            onValidityChange={onValidityChange}
           />
         );
 

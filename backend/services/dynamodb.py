@@ -227,14 +227,17 @@ class DynamoDBService:
                 "message": f"Failed to delete project: {str(e)}"
             }
 
-    # ========== QUESTION & ANSWER OPERATIONS ==========
+    # ========== QUESTION & ANSWER OPERATIONS (UPDATED for Task 4) ==========
     
     def save_question_answer(self, user_email: str, project_id: str, task_index: int, 
-                       subtask_index: int, question_id: str, question_text: str,
-                       question_type: str, user_response: Optional[str] = None,
-                       options: Optional[List[str]] = None, file_url: Optional[str] = None,
-                       file_name: Optional[str] = None, selected_options: Optional[List[str]] = None) -> Dict:  # FIXED: Added selected_options parameter
-        """Save a question and its answer"""
+                   subtask_index: int, question_id: str, question_text: str,
+                   question_type: str, user_response: Optional[str] = None,
+                   options: Optional[List[str]] = None, file_url: Optional[str] = None,
+                   file_name: Optional[str] = None, selected_options: Optional[List[str]] = None,
+                   # NEW: Task 4 parameters
+                   slider_value: Optional[int] = None, 
+                   hyperparameter_values: Optional[Dict[str, Any]] = None) -> Dict:
+        """Save a question and its answer with Task 4 support"""
         try:
             item = {
                 'PK': f"{user_email}#{project_id}",
@@ -248,9 +251,12 @@ class DynamoDBService:
                 'options': options,
                 'fileUrl': file_url,
                 'fileName': file_name,
-                'selectedOptions': selected_options,  # FIXED: Store multiselect options
+                'selectedOptions': selected_options,
                 'answeredAt': datetime.utcnow().isoformat(),
-                'itemType': 'QUESTION_ANSWER'
+                'itemType': 'QUESTION_ANSWER',
+                # NEW: Task 4 fields
+                'sliderValue': slider_value,
+                'hyperparameterValues': hyperparameter_values
             }
             
             # Remove None values

@@ -28,8 +28,8 @@ export interface GetProjectsResponse {
   projects: Project[];
 }
 
-// Updated question system types with multiselect
-export type QuestionType = 'text' | 'radio' | 'file' | 'readonly' | 'multiselect'; // NEW: Added multiselect
+// UPDATED question system types with Task 4 support
+export type QuestionType = 'text' | 'radio' | 'file' | 'readonly' | 'multiselect' | 'slider' | 'hyperparameter'; // NEW: Added Task 4 types
 
 export interface Question {
   questionId: string;
@@ -41,7 +41,7 @@ export interface Question {
   isRequired: boolean;
   fileTypes?: string[];
   maxFileSize?: number;
-  // NEW: Additional fields for Task 3
+  // Task 3 fields
   missingInfo?: {
     total_missing: number;
     total_rows: number;
@@ -58,6 +58,25 @@ export interface Question {
     min_percentage: number;
     total_samples: number;
   };
+  // NEW: Task 4 fields
+  sliderConfig?: {
+    min: number;
+    max: number;
+    default: number;
+    step: number;
+    leftLabel: string;
+    rightLabel: string;
+  };
+  hyperparameters?: Array<{
+    name: string;
+    type: 'integer' | 'float' | 'select';
+    min?: number;
+    max?: number;
+    default: number | string;
+    options?: string[];
+    description: string;
+  }>;
+  generatedCode?: string;
 }
 
 export interface Answer {
@@ -69,10 +88,13 @@ export interface Answer {
   answerType: QuestionType;
   textAnswer?: string;
   selectedOption?: string;
-  selectedOptions?: string[]; // NEW: For multiselect
+  selectedOptions?: string[]; // For multiselect
   fileName?: string;
   fileUrl?: string;
   answeredAt: string;
+  // NEW: Task 4 fields
+  sliderValue?: number;
+  hyperparameterValues?: Record<string, any>;
 }
 
 export interface DatasetSummary {
@@ -110,9 +132,12 @@ export interface AnswerSubmissionRequest {
   answerType: QuestionType;
   textAnswer?: string;
   selectedOption?: string;
-  selectedOptions?: string[]; // NEW: For multiselect
+  selectedOptions?: string[]; // For multiselect
   fileName?: string;
   fileUrl?: string;
+  // NEW: Task 4 fields
+  sliderValue?: number;
+  hyperparameterValues?: Record<string, any>;
 }
 
 export interface ProgressResponse {

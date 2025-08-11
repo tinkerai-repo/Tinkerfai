@@ -160,6 +160,8 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
         throw new Error("User not authenticated");
       }
 
+      console.log("Submitting answer data:", currentAnswerData); // Debug log
+
       const submissionData = {
         userEmail: user.email,
         projectId: projectId,
@@ -169,10 +171,15 @@ const PlaygroundSection: React.FC<PlaygroundSectionProps> = ({
         answerType: currentAnswerData.answerType,
         textAnswer: currentAnswerData.textAnswer,
         selectedOption: currentAnswerData.selectedOption,
-        selectedOptions: currentAnswerData.selectedOptions, // NEW: Include multiselect
+        selectedOptions: currentAnswerData.selectedOptions, // Multiselect
         fileName: currentAnswerData.fileName,
         fileUrl: currentAnswerData.fileUrl,
+        // NEW: Task 4 fields - include these in submission
+        sliderValue: currentAnswerData.sliderValue,
+        hyperparameterValues: currentAnswerData.hyperparameterValues,
       };
+
+      console.log("Final submission data:", submissionData); // Debug log
 
       const response = await projectApi.submitAnswer(projectId, submissionData);
 
