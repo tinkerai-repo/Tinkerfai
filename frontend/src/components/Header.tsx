@@ -54,7 +54,7 @@ const Header: React.FC = () => {
       >
         <div className="header-coin-counter">
           <img src={coinIcon} alt="Coins" className="header-coin-icon" />
-          <span className="header-coin-number">00050</span>
+          <span className="header-coin-number">00147</span>
         </div>
         <div style={{ position: "relative" }} ref={menuRef}>
           <button
